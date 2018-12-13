@@ -5,10 +5,10 @@
     "browser_action": {
         "default_popup": "popup.html",
         "default_icon": {
-            "16": "images/AdclipseIcon16_alt2.png",
-            "32": "images/AdclipseIcon32_alt2.png",
-            "48": "images/AdclipseIcon48_alt2.png",
-            "128": "images/AdclipseIcon128_alt2.png"
+            "16": "images/AdclipseIcon16_alt4.png",
+            "32": "images/AdclipseIcon32_alt4.png",
+            "48": "images/AdclipseIcon48_alt4.png",
+            "128": "images/AdclipseIcon128_alt4.png"
         }
     },
     "background": {
@@ -16,12 +16,12 @@
         "persistent": false
     },
     "icons": {
-        "16": "images/AdclipseIcon16_alt2.png",
-        "19": "images/AdclipseIcon19_alt2.png",
-        "32": "images/AdclipseIcon32_alt2.png",
-        "38": "images/AdclipseIcon38_alt2.png",
-        "48": "images/AdclipseIcon48_alt2.png",
-        "128": "images/AdclipseIcon128_alt2.png"
+        "16": "images/AdclipseIcon16_alt4.png",
+        "19": "images/AdclipseIcon19_alt4.png",
+        "32": "images/AdclipseIcon32_alt4.png",
+        "38": "images/AdclipseIcon38_alt4.png",
+        "48": "images/AdclipseIcon48_alt4.png",
+        "128": "images/AdclipseIcon128_alt4.png"
     },
     "options_page": "options.html",
     "permissions": ["activeTab", "declarativeContent", "storage"],
