@@ -1,6 +1,6 @@
 {
     "name": "Adclipse",
-    "version": "1.0",
+    "version": "1.0.0",
     "description": "A better adblocker",
     "browser_action": {
         "default_popup": "popup.html",

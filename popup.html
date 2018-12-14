@@ -1,16 +1,109 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
+    <!--Google Tutorial used inline styling so i'll just keep that.-->
     <style>
-      button {
-        height: 30px;
-        width: 30px;
-        outline: none;
-      }
+        body {
+            height: 400px;
+            width: 200px;
+            background-color: black;
+            padding: 0px;
+            margin: 0px;
+        }
+
+        #logo {
+            background-image: url('images/RawAdclipseIcon_alt4.svg');
+            background-size: cover;
+            height: 200px;
+            width: 200px;
+            outline: none;
+        }
+
+        #identificationArea {
+            background-color: white;
+            height: 46px;
+            width: 196px;
+            padding: 2px 2px 1px 2px;
+        }
+
+        #hidingArea {
+            background-color: white;
+            height: 46px;
+            width: 196px;
+            padding: 1px 2px 2px 2px;
+        }
+
+        .button {
+            display: inline-block;
+            height: 46px;
+            width: 96px;
+            margin: 0;
+            background-color: black;
+            color: white;
+            font-size: 14px;
+            line-height: 46px;
+            text-align: center;
+        }
+
+
+        #metricsArea {
+            text-align: center;
+            height: 90px;
+            width: 200px;
+            background-color: white;
+            line-height: 90px;
+            font-size: 24px;
+        }
+
+        #footer {
+            background-color: black;
+            text-align: center;
+            color: white;
+            line-height: 20px;
+            height: 20px;
+            width: 200px;
+        }
     </style>
-  </head>
-  <body>
-    <button id="changeColor"></button>
+</head>
+
+<body>
+    <!--Logo Area. This doubles as a toggle for enable/disable on a page. This should also serve as a whitelist button.-->
+    <div id="logo">
+
+    </div>
+
+    <!--Area for selecting the identification mode. This changes how ads are identified.-->
+    <div id="identificationArea">
+        <div class="button">
+            Aggressive
+        </div>
+        <div class="button">
+            Relaxed
+        </div>
+    </div>
+
+    <!--Area for selecting the hiding mode. This changes how ads are hidden.-->
+    <div id="hidingArea">
+        <div class="button">
+            Hide
+        </div>
+        <div class="button">
+            Highlight
+        </div>
+    </div>
+
+    <!--Area for displaying metrics. This will show how many ads were caught on a page.-->
+    <div id="metricsArea">
+        12
+    </div>
+
+    <!--Whitelist button. This means always disable adclipse on this site. -->
+    <div id="footer">
+        Adclipse 1.0
+    </div>
+
     <script src="popup.js"></script>
-  </body>
+</body>
+
 </html>
