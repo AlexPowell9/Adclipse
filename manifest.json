@@ -1,9 +1,10 @@
 {
     "name": "Adclipse",
-    "version": "1.0.0",
-    "description": "A better adblocker",
+    "version": "0.1.0",
+    "description": "A perceptual adblocker",
     "browser_action": {
         "default_popup": "popup.html",
+        "default_title": "Adclipse",
         "default_icon": {
             "16": "images/AdclipseIcon16_alt4.png",
             "32": "images/AdclipseIcon32_alt4.png",
@@ -11,6 +12,14 @@
             "128": "images/AdclipseIcon128_alt4.png"
         }
     },
+    "content_scripts": [{
+        "matches": ["http://*/*",
+            "https://*/*"],
+        "js": ["content.js"],
+        "run_at": "document_idle",
+        "all_frames": true,
+        "match_about_blank": true
+    }],
     "background": {
         "scripts": ["background.js"],
         "persistent": false
@@ -24,6 +33,6 @@
         "128": "images/AdclipseIcon128_alt4.png"
     },
     "options_page": "options.html",
-    "permissions": ["activeTab", "declarativeContent", "storage"],
+    "permissions": ["tabs", "storage"],
     "manifest_version": 2
 }
