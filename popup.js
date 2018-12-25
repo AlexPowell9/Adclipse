@@ -33,3 +33,21 @@ chrome.tabs.query({
     updateAdsBlocked(response.adCount);
   });
 });
+
+
+/*
+ * Handle turning adclipse on and off on a given site. 
+ *
+ * TODO: add a method of just turning it off for a given tab.
+ * 
+ * On click it should add to whitelist and present refresh button. 
+ */
+var disabled = false;
+document.getElementById("logo").addEventListener("click", function () {
+  disabled = !disabled;
+  if (disabled) {
+    document.getElementById("logo").style.backgroundImage = "url('images/Toggle_Off.svg')";
+  } else {
+    document.getElementById("logo").style.backgroundImage = "url('images/Toggle_On.svg')";
+  }
+});

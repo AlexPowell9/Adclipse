@@ -3,6 +3,7 @@
 <!--This page is the popup when you click on the adclipse logo.-->
 
 <html>
+
 <head>
     <style>
         body {
@@ -11,10 +12,14 @@
             background-color: black;
             padding: 0px;
             margin: 0px;
+            user-select: none;
+        }
+        .pointer:hover{
+            cursor: pointer;
         }
 
         #logo {
-            background-image: url('images/RawAdclipseIcon_alt4.svg');
+            background-image: url('images/Toggle_On.svg');
             background-size: cover;
             height: 200px;
             width: 200px;
@@ -70,7 +75,7 @@
 
 <body>
     <!--Logo Area. This doubles as a toggle for enable/disable on a page. This should also serve as a whitelist button.-->
-    <div id="logo">
+    <div id="logo" class="pointer">
 
     </div>
 
@@ -104,6 +109,7 @@
         Adclipse <span id="version"></span>
     </div>
 
+    <!--Specifies the js file to load for logic.-->
     <script src="popup.js"></script>
 </body>
 
