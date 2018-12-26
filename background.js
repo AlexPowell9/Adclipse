@@ -1,10 +1,14 @@
 /*
- * This file is a single long running script that sits above all pages. There is
+ * SUMMARY: This file is a single long running script that sits above all pages. There is
  * only one instance at a time and it exists for the lifetime of the extension. 
  * 
  * https://stackoverflow.com/questions/12971869/background-vs-content-scripts
  */
 
+
+/*
+ * Set background color to match ublock and noscript color. Idk how they got their badge looking so nice and uniform.
+ */
 chrome.browserAction.setBadgeBackgroundColor({
   color: '#525252'
 });

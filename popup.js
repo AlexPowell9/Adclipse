@@ -1,5 +1,5 @@
 /*
- * This script only runs when a user clicks on the icon. 
+ * SUMMARY: This script only runs when a user clicks on the icon. 
  */
 
 
@@ -21,11 +21,13 @@ function updateAdsBlocked(ads) {
  *
  * https://developer.chrome.com/extensions/messaging
  */
+var currentTab;
 chrome.tabs.query({
   active: true,
   currentWindow: true
 }, function (tabs) {
   console.log(tabs);
+  currentTab = tabs[0];
   chrome.tabs.sendMessage(tabs[0].id, {
     type: "getAdCount"
   }, function (response) {
@@ -48,8 +50,12 @@ document.getElementById("logo").addEventListener("click", function () {
   showRefreshButton(disabled);
   if (disabled) {
     document.getElementById("logo").style.backgroundImage = "url('images/Toggle_Off.svg')";
+    //Add domain to whitelist
+    updateWhitelist(extractRootDomain(currentTab.url), true);
   } else {
     document.getElementById("logo").style.backgroundImage = "url('images/Toggle_On.svg')";
+    //Remove domain from whitelist
+    updateWhitelist(extractRootDomain(currentTab.url), false);
   }
 });
 
@@ -60,6 +66,7 @@ document.getElementById("logo").addEventListener("click", function () {
  * https://stackoverflow.com/questions/8342756/chrome-extension-api-for-refreshing-the-page
  */
 document.getElementById("refresh").addEventListener("click", function () {
+  //Reload the tab.
   chrome.tabs.query({
     active: true,
     currentWindow: true
@@ -86,9 +93,76 @@ function showRefreshButton(visible) {
 
 
 /*
- * Add to whitelist. 
+ * Whitelist manager. add=true when you want to add an item, and add=false when you want to remove an item.
  *
- * TODO: Using local storage, evaluate that decsion against using sync storage. 
+ * TODO: Currently using local storage, evaluate that decsion against using sync storage. 
  *
  * https://developer.chrome.com/extensions/storage
  */
+function updateWhitelist(domain, add) {
+  console.log(domain);
+  var storageCopy = [];
+  chrome.storage.local.get("whitelist", function (returnedStorage) {
+    console.log(returnedStorage);
+    if (returnedStorage['whitelist'] !== undefined) {
+      storageCopy = returnedStorage['whitelist'];
+    }
+    //Add or remove
+    if (add) {
+      //Check if entry already exists
+      if (storageCopy.indexOf(domain) === -1) {
+        storageCopy.push(domain);
+      }
+    } else {
+      //Verify entry exists
+      if (storageCopy.indexOf(domain) === -1) {
+        storageCopy.splice(storageCopy.indexOf('domain'), 1);
+      }
+    }
+    //Update with new
+    chrome.storage.local.set({
+      "whitelist": storageCopy
+    }, function () {
+      //Callback
+      console.log("done")
+    });
+  });
+}
+
+
+/*
+ * Extract hsotname and/or root domain from url.
+ *
+ * https://stackoverflow.com/questions/8498592/extract-hostname-name-from-string
+ */
+function extractHostname(url) {
+  var hostname;
+  //find & remove protocol (http, ftp, etc.) and get hostname
+  if (url.indexOf("//") > -1) {
+    hostname = url.split('/')[2];
+  } else {
+    hostname = url.split('/')[0];
+  }
+  //find & remove port number
+  hostname = hostname.split(':')[0];
+  //find & remove "?"
+  hostname = hostname.split('?')[0];
+  return hostname;
+}
+
+function extractRootDomain(url) {
+  var domain = extractHostname(url),
+    splitArr = domain.split('.'),
+    arrLen = splitArr.length;
+  //extracting the root domain here
+  //if there is a subdomain 
+  if (arrLen > 2) {
+    domain = splitArr[arrLen - 2] + '.' + splitArr[arrLen - 1];
+    //check to see if it's using a Country Code Top Level Domain (ccTLD) (i.e. ".me.uk")
+    if (splitArr[arrLen - 2].length == 2 && splitArr[arrLen - 1].length == 2) {
+      //this is using a ccTLD
+      domain = splitArr[arrLen - 3] + '.' + domain;
+    }
+  }
+  return domain;
+}

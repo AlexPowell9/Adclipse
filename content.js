@@ -1,5 +1,5 @@
 /*
- * This file runs on every tab that fufills the "matches" line in the manifest.json. 
+ * SUMMARY: This file runs on every tab that fufills the "matches" line in the manifest.json. 
  * 
  * https://stackoverflow.com/questions/12971869/background-vs-content-scripts
  */
