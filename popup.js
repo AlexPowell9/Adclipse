@@ -114,6 +114,7 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
  * Whitelist manager. add=true when you want to add an item, and add=false when you want to remove an item.
  *
  * TODO: Currently using local storage, evaluate that decsion against using sync storage. 
+ * TODO: Send content.js a message letting it know something has changed.  
  *
  * https://developer.chrome.com/extensions/storage
  */

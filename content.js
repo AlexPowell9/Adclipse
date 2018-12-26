@@ -13,6 +13,8 @@ var whitelisted = false;
 
 /*
  * Check if domain is whitelisted, change display accordingly.
+ *
+ * TODO: Perform this action whenever user disables, not just on reload. Listen for message from popup.
  */
 var storageCopy = [];
 chrome.storage.local.get("whitelist", function (returnedStorage) {
