@@ -19,13 +19,13 @@ chrome.browserAction.setBadgeBackgroundColor({
  * https://stackoverflow.com/questions/32168449/how-can-i-get-different-badge-value-for-every-tab-on-chrome
  */
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+  //deal with badge messages
   if (message.badgeText) {
     chrome.tabs.get(sender.tab.id, function (tab) {
       if (chrome.runtime.lastError) {
         return; // the prerendered tab has been nuked, happens in omnibox search
       }
       if (tab.index >= 0) { // tab is visible
-        console.log("1");
         chrome.browserAction.setBadgeText({
           tabId: tab.id,
           text: message.badgeText
@@ -45,4 +45,56 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       }
     });
   }
+  //Deal with icon messages
+  if (message.iconDisabled !== null) {
+    if (message.iconDisabled) {
+      chrome.browserAction.setIcon({
+        path: {
+          16: "images/AdclipseIcon16_alt4_off.png",
+          32: "images/AdclipseIcon32_alt4_off.png",
+          48: "images/AdclipseIcon48_alt4_off.png",
+          128: "images/AdclipseIcon128_alt4_off.png"
+        },
+        tabId: sender.tab.id
+      });
+    } else {
+      chrome.browserAction.setIcon({
+        path: {
+          16: "images/AdclipseIcon16_alt4.png",
+          32: "images/AdclipseIcon32_alt4.png",
+          48: "images/AdclipseIcon48_alt4.png",
+          128: "images/AdclipseIcon128_alt4.png"
+        },
+        tabId: sender.tab.id
+      });
+    }
+  }
 });
+
+
+/*
+ * Here we set the badge icon to display as either active on inactive based on whether the site is whitelisted or not.
+ *
+ * https://developer.chrome.com/extensions/browserAction#method-setIcon
+ */
+function setIcon(iconDisabled) {
+  if (iconDisabled) {
+    chrome.browserAction.setIcon({
+      16: "images/AdclipseIcon16_alt4_off.png",
+      32: "images/AdclipseIcon32_alt4_off.png",
+      48: "images/AdclipseIcon48_alt4_off.png",
+      128: "images/AdclipseIcon128_alt4_off.png"
+    }, function () {
+      console.log("done");
+    });
+  } else {
+    chrome.browserAction.setIcon({
+      16: "images/AdclipseIcon16_alt4.png",
+      32: "images/AdclipseIcon32_alt4.png",
+      48: "images/AdclipseIcon48_alt4.png",
+      128: "images/AdclipseIcon128_alt4.png"
+    }, function () {
+      console.log("done");
+    });
+  }
+}

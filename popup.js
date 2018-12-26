@@ -9,11 +9,12 @@
 var manifestData = chrome.runtime.getManifest();
 document.getElementById('version').innerHTML = manifestData.version;
 
-//Update the popup to show how many ads were blocked.
+/*
+ * Update the popup to show how many ads were blocked.
+ */
 function updateAdsBlocked(ads) {
   document.getElementById('metricsArea').innerHTML = ads;
 }
-
 
 /*
  * This gets the current tab, then sends its content.js a message asking for the ad count.
@@ -28,7 +29,7 @@ chrome.tabs.query({
 }, function (tabs) {
   console.log(tabs);
   currentTab = tabs[0];
-  chrome.tabs.sendMessage(tabs[0].id, {
+  chrome.tabs.sendMessage(currentTab.id, {
     type: "getAdCount"
   }, function (response) {
     console.log(response);
@@ -37,17 +38,19 @@ chrome.tabs.query({
 });
 
 
+
 /*
  * Handle turning adclipse on and off on a given site. 
  *
  * TODO: add a method of just turning it off for a given tab.
- * 
- * On click it should add to whitelist and present refresh button. 
  */
 var disabled = false;
+var changed = false;
 document.getElementById("logo").addEventListener("click", function () {
   disabled = !disabled;
-  showRefreshButton(disabled);
+  //different variable because got into trouble with whitelist functionality.
+  changed = !changed;
+  showRefreshButton(changed);
   if (disabled) {
     document.getElementById("logo").style.backgroundImage = "url('images/Toggle_Off.svg')";
     //Add domain to whitelist
@@ -88,9 +91,24 @@ function showRefreshButton(visible) {
     document.getElementById("refresh").style.display = "none";
     document.getElementById("metricsArea").style.display = "block";
   }
-
 }
 
+/*
+ * Check if domain is whitelisted, change display accordingly.
+ */
+var storageCopy = [];
+chrome.storage.local.get("whitelist", function (returnedStorage) {
+  console.log(returnedStorage);
+  if (returnedStorage['whitelist'] !== undefined) {
+    storageCopy = returnedStorage['whitelist'];
+  }
+  var d = extractRootDomain(currentTab.url);
+  //Whitelisted.
+  if (storageCopy.indexOf(d) != -1) {
+    disabled = true;
+    document.getElementById("logo").style.backgroundImage = "url('images/Toggle_Off.svg')";
+  }
+});
 
 /*
  * Whitelist manager. add=true when you want to add an item, and add=false when you want to remove an item.
@@ -100,38 +118,31 @@ function showRefreshButton(visible) {
  * https://developer.chrome.com/extensions/storage
  */
 function updateWhitelist(domain, add) {
-  console.log(domain);
-  var storageCopy = [];
-  chrome.storage.local.get("whitelist", function (returnedStorage) {
-    console.log(returnedStorage);
-    if (returnedStorage['whitelist'] !== undefined) {
-      storageCopy = returnedStorage['whitelist'];
+  //Add or remove
+  if (add) {
+    //Check if entry already exists
+    if (storageCopy.indexOf(domain) === -1) {
+      storageCopy.push(domain);
     }
-    //Add or remove
-    if (add) {
-      //Check if entry already exists
-      if (storageCopy.indexOf(domain) === -1) {
-        storageCopy.push(domain);
-      }
-    } else {
-      //Verify entry exists
-      if (storageCopy.indexOf(domain) === -1) {
-        storageCopy.splice(storageCopy.indexOf('domain'), 1);
-      }
+  } else {
+    //Verify entry exists
+    if (storageCopy.indexOf(domain) != -1) {
+      storageCopy.splice(storageCopy.indexOf('domain'), 1);
     }
-    //Update with new
-    chrome.storage.local.set({
-      "whitelist": storageCopy
-    }, function () {
-      //Callback
-      console.log("done")
-    });
+  }
+  //Update with new
+  chrome.storage.local.set({
+    "whitelist": storageCopy
+  }, function () {
+    //Callback
+    console.log("done")
   });
+
 }
 
 
 /*
- * Extract hsotname and/or root domain from url.
+ * Extract hostname and/or root domain from url.
  *
  * https://stackoverflow.com/questions/8498592/extract-hostname-name-from-string
  */
