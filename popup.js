@@ -45,9 +45,50 @@ chrome.tabs.query({
 var disabled = false;
 document.getElementById("logo").addEventListener("click", function () {
   disabled = !disabled;
+  showRefreshButton(disabled);
   if (disabled) {
     document.getElementById("logo").style.backgroundImage = "url('images/Toggle_Off.svg')";
   } else {
     document.getElementById("logo").style.backgroundImage = "url('images/Toggle_On.svg')";
   }
 });
+
+
+/*
+ * Refresh page. Close popup. 
+ *
+ * https://stackoverflow.com/questions/8342756/chrome-extension-api-for-refreshing-the-page
+ */
+document.getElementById("refresh").addEventListener("click", function () {
+  chrome.tabs.query({
+    active: true,
+    currentWindow: true
+  }, function (arrayOfTabs) {
+    chrome.tabs.reload(arrayOfTabs[0].id);
+  });
+  window.close();
+});
+
+
+/*
+ * Enable refresh button, disable metrics area.
+ */
+function showRefreshButton(visible) {
+  if (visible) {
+    document.getElementById("refresh").style.display = "block";
+    document.getElementById("metricsArea").style.display = "none";
+  } else {
+    document.getElementById("refresh").style.display = "none";
+    document.getElementById("metricsArea").style.display = "block";
+  }
+
+}
+
+
+/*
+ * Add to whitelist. 
+ *
+ * TODO: Using local storage, evaluate that decsion against using sync storage. 
+ *
+ * https://developer.chrome.com/extensions/storage
+ */

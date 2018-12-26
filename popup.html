@@ -14,7 +14,8 @@
             margin: 0px;
             user-select: none;
         }
-        .pointer:hover{
+
+        .pointer:hover {
             cursor: pointer;
         }
 
@@ -52,7 +53,6 @@
             text-align: center;
         }
 
-
         #metricsArea {
             text-align: center;
             height: 90px;
@@ -60,6 +60,26 @@
             background-color: white;
             line-height: 90px;
             font-size: 24px;
+            display: block;
+        }
+
+        #refresh {
+            text-align: center;
+            height: 90px;
+            width: 200px;
+            background-color: white;
+            line-height: 90px;
+            font-size: 24px;
+            display:none;
+        }
+
+        #refresh img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            height:50px;
+            width:50px;
+            padding-top:20px;
         }
 
         #footer {
@@ -99,10 +119,13 @@
         </div>
     </div>
 
-    <!--Area for displaying metrics. This will show how many ads were caught on a page.-->
+    <!--Area for displaying metrics/displaying refresh button. This will show how many ads were caught on a page.-->
     <div id="metricsArea">
         0
     </div>
+
+    <!--Show the refresh button. This should be visible iff metrics area is hidden. -->
+    <div id="refresh" class="pointer"><img src="images/refresh.svg"> </div>
 
     <!--Whitelist button. This means always disable adclipse on this site. -->
     <div id="footer">
