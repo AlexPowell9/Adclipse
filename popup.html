@@ -7,7 +7,7 @@
 <head>
     <style>
         body {
-            height: 400px;
+            height: 350px;
             width: 200px;
             background-color: black;
             padding: 0px;
@@ -31,26 +31,28 @@
             background-color: white;
             height: 46px;
             width: 196px;
-            padding: 2px 2px 1px 2px;
-        }
-
-        #hidingArea {
-            background-color: white;
-            height: 46px;
-            width: 196px;
-            padding: 1px 2px 2px 2px;
+            padding: 2px 2px 2px 2px;
         }
 
         .button {
             display: inline-block;
             height: 46px;
-            width: 96px;
+            width: 46px;
             margin: 0;
             background-color: black;
             color: white;
             font-size: 14px;
             line-height: 46px;
             text-align: center;
+            margin-top: 0;
+        }
+
+        .button img {
+            display: inline-block;
+            height: 26px;
+            width: 26px;
+            margin: auto;
+            padding-top: 10px;
         }
 
         #metricsArea {
@@ -70,16 +72,16 @@
             background-color: white;
             line-height: 90px;
             font-size: 24px;
-            display:none;
+            display: none;
         }
 
         #refresh img {
             display: block;
             margin-left: auto;
             margin-right: auto;
-            height:50px;
-            width:50px;
-            padding-top:20px;
+            height: 50px;
+            width: 50px;
+            padding-top: 20px;
         }
 
         #footer {
@@ -102,20 +104,20 @@
     <!--Area for selecting the identification mode. This changes how ads are identified.-->
     <div id="identificationArea">
         <div class="button">
-            Aggressive
+            <!--Future button-->
+            <img>
         </div>
         <div class="button">
-            Relaxed
-        </div>
-    </div>
-
-    <!--Area for selecting the hiding mode. This changes how ads are hidden.-->
-    <div id="hidingArea">
-        <div class="button">
-            Hide
+            <!--Future button-->
+            <img>
         </div>
         <div class="button">
-            Highlight
+            <!--Future button-->
+            <img>
+        </div>
+        <div class="button pointer" id="options">
+            <!--Options button-->
+            <img src="images/options.svg">
         </div>
     </div>
 

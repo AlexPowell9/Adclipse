@@ -81,6 +81,20 @@ document.getElementById("refresh").addEventListener("click", function () {
 
 
 /*
+ * Open Options page. 
+ *
+ * https://developer.chrome.com/extensions/options
+ */
+document.querySelector('#options').addEventListener("click", function () {
+  if (chrome.runtime.openOptionsPage) {
+    chrome.runtime.openOptionsPage();
+  } else {
+    window.open(chrome.runtime.getURL('options.html'));
+  }
+});
+
+
+/*
  * Enable refresh button, disable metrics area.
  */
 function showRefreshButton(visible) {
@@ -110,6 +124,7 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
   }
 });
 
+
 /*
  * Whitelist manager. add=true when you want to add an item, and add=false when you want to remove an item.
  *
@@ -138,7 +153,6 @@ function updateWhitelist(domain, add) {
     //Callback
     console.log("done")
   });
-
 }
 
 
