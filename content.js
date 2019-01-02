@@ -8,7 +8,7 @@
 
 
 var currentTab = location.href;
-console.log(currentTab);
+// console.log(currentTab);
 var whitelisted = false;
 
 /*
@@ -22,13 +22,18 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
         storageCopy = returnedStorage['whitelist'];
     }
     var d = extractRootDomain(currentTab);
-    console.log(d);
+    // console.log(d);
     //Whitelisted.
     if (storageCopy.indexOf(d) != -1) {
         whitelisted = true;
     }
-    getAdsBlocked();
-    setIcon();
+    //getAdsBlocked();
+    highlightAds();
+    setInterval(function() {
+       highlightAds();
+       setBadge();
+       setIcon();
+    }, 5000);
 });
 
 
@@ -47,7 +52,23 @@ function getAdsBlocked() {
     setIcon();
 }
 
+/*
+ * Highlight Potential Ads
+ * For now, I'm just going to highlight all iframes
+ * TODO: proper container selection and ad identification
+ */
 
+function highlightAds() {
+    adsBlocked = 0;
+    document.querySelectorAll("iframe").forEach((iframe) => {
+        console.log('Potential Ad' + iframe);
+        iframe.style.border = "10px solid red";
+        iframe.classList.add("adclipse-ad");
+        // iframe.remove();
+        adsBlocked++;
+    });
+    console.log('Ads blocked: ' + adsBlocked);
+}
 
 
 
@@ -81,7 +102,7 @@ function setBadge() {
  * This is what controls the icon being enabled/disabled.
  */
 function setIcon() {
-    console.log("called set icon!");
+    // console.log("called set icon!");
     chrome.runtime.sendMessage({
         iconDisabled: whitelisted
     });
@@ -94,9 +115,9 @@ function setIcon() {
  */
 chrome.runtime.onMessage.addListener(
     function (request, sender, sendResponse) {
-        console.log(sender.tab ?
-            "from a content script:" + sender.tab.url :
-            "from the extension");
+        // console.log(sender.tab ?
+        //     "from a content script:" + sender.tab.url :
+        //     "from the extension");
         if (request.type == "getAdCount")
             sendResponse({
                 adCount: "" + adsBlocked
