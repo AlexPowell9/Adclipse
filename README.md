@@ -19,7 +19,10 @@ All the code is commented but probably not very good.
 
 ### Features
 - **GUI**: It has icons and badges. You can click it to open the popup and you can do stuff.
-- **Badge**: It generates a random number of `ads blocked` on each page. It is currently capped in triple digits until I get around to adding support for infinitely large numbers. Badges only support like 3-4 digits so we'd have to make `10,001` turn into `>10k` kind of thing. 
+- **Container Selection**: At the moment, we have super-duper basic container selection. All is does is select all containers with the attribute "data-google-query-id"
+- **Ad Detection**: We have a function for it that takes in selected containers and, at the moment, just returns true unless the container is 1px in width.
+- **Highlighting**: Containers that return true from the ad detection function are highlighted with a 10px red border and greyscaled.
+- **Badge**: It displays the number of ads "detected" on the currently displayed tab. It is currently capped in triple digits until I get around to adding support for infinitely large numbers. Badges only support like 3-4 digits so we'd have to make `10,001` turn into `>10k` kind of thing. 
 - **Whitelist**: Whenever you toggle adclipse it will add the domain to a whitelist that is kept in local storage. 
 - **Refresh**: To go along with toggling adclipse there is a working refresh button that appears so you can force it to reload and not run the content script.
 - **Options Page**: If you click the gear icon it will take you to an options page that only displays all of the domains in your whitelist. If your whitelist is empty, it will be empty. This is where we can hide a bunch of nitty gritty settings for us.
