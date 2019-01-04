@@ -33,7 +33,7 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
        highlightAds();
        setBadge();
        setIcon();
-    }, 5000);
+    }, 2500);
 });
 
 
@@ -54,20 +54,37 @@ function getAdsBlocked() {
 
 /*
  * Highlight Potential Ads
- * For now, I'm just going to highlight all iframes
+ * For now, I'm just going to highlight all google ads
  * TODO: proper container selection and ad identification
  */
 
 function highlightAds() {
     adsBlocked = 0;
-    document.querySelectorAll("iframe").forEach((iframe) => {
-        console.log('Potential Ad' + iframe);
-        iframe.style.border = "10px solid red";
-        iframe.classList.add("adclipse-ad");
-        // iframe.remove();
+    selectContainers().forEach(container => {
+        // container.style.border = "10px solid red";
+        if(isAd(container)) container.classList.add("adclipse-ad");
         adsBlocked++;
     });
     console.log('Ads blocked: ' + adsBlocked);
+}
+
+/*
+ * Select Candidate Containers
+ * Chooses which containers are potentially ads
+ * TODO: make this way better
+ */
+function selectContainers() {
+    return document.querySelectorAll("[data-google-query-id]");
+}
+
+/*
+ * Returns true if the given container is an ad
+ * For now, it returns true always unless the container is 1px
+ * TODO: make this actually detect if the container is an ad
+ */
+function isAd(container) {
+    if(container.style.width === "1px") return false;
+    else return true;
 }
 
 
