@@ -26,14 +26,19 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
     //Whitelisted.
     if (storageCopy.indexOf(d) != -1) {
         whitelisted = true;
+        adsBlocked = 0;
+        setBadge();
+        setIcon();
+    } else {
+        highlightAds();
+        setInterval(function () {
+            highlightAds();
+            setBadge();
+            setIcon();
+        }, 2500);
     }
     //getAdsBlocked();
-    highlightAds();
-    setInterval(function() {
-       highlightAds();
-       setBadge();
-       setIcon();
-    }, 2500);
+
 });
 
 
@@ -62,7 +67,7 @@ function highlightAds() {
     adsBlocked = 0;
     selectContainers().forEach(container => {
         // container.style.border = "10px solid red";
-        if(isAd(container)) container.classList.add("adclipse-ad");
+        if (isAd(container)) container.classList.add("adclipse-ad");
         adsBlocked++;
     });
     console.log('Ads blocked: ' + adsBlocked);
@@ -83,7 +88,7 @@ function selectContainers() {
  * TODO: make this actually detect if the container is an ad
  */
 function isAd(container) {
-    if(container.style.width === "1px") return false;
+    if (container.style.width === "1px") return false;
     else return true;
 }
 
