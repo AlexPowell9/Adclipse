@@ -74,7 +74,36 @@ function highlightAds() {
  * TODO: make this way better
  */
 function selectContainers() {
+	let selectContainerMethods = [getVisibleContainers];
+	let containers = [];
+	selectContainerMethods.forEach((method) => {
+		containers = method(containers);
+	})
+	return containers;
+}
+
+let googleDataIdSelector = (containers) => {
     return document.querySelectorAll("[data-google-query-id]");
+}
+
+
+let getVisibleContainers = (containers) => {
+	let vis  = [];
+	containers.forEach((container) => {
+		if(isVisible(container)vis.push(container);
+	});
+	return vis
+}
+
+let isVisible = (container) => {
+	//TODO make this check if the container is visible
+	return true;
+})
+
+let getAllContainers = () => {
+	let containers =[];
+	containers = document.body.getElementsByTagName("*");
+	return containers;
 }
 
 /*
