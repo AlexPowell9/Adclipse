@@ -5,17 +5,51 @@
 <html>
 
 <head>
-  <!--Inline styling definitions instead of including a css file. -->
-  <style>
-
-  </style>
+  <title>Adclipse Options</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="options.css" rel="stylesheet">
+  <link href="content.css" rel="stylesheet">
 </head>
 
 <body>
-  <h3>Whitelist</h3>
-  <div id="whitelist">
+  <main>
 
-  </div>
+    <!--Tab Titles-->
+    <input id="tab1" type="radio" name="tabs" class="disable-select" checked>
+    <label for="tab1" class="disable-select">Visual</label>
+
+    <input id="tab2" type="radio" name="tabs" class="disable-select">
+    <label for="tab2" class="disable-select">Detection</label>
+
+    <input id="tab3" type="radio" name="tabs" class="disable-select">
+    <label for="tab3" class="disable-select">Whitelist</label>
+
+    <!--Tab Content-->
+    <section id="content1">
+      <div>
+        <div id="exampleAd">
+          <img src="images/sampleAd.png">
+        </div>
+      </div>
+      <h3>Highlighting Options</h3>
+      <div>
+        <input type="checkbox" name="grayscale">Grayscale<br>
+        <input type="checkbox" name="color">Color<br>
+        <input type="checkbox" name="border">Border<br>
+        <input type="checkbox" name="Label">Label<br>
+      </div>
+    </section>
+
+    <section id="content2">
+      <p> There's nothing here yet! </p>
+    </section>
+
+    <section id="content3">
+      <div id="whitelist">
+      </div>
+    </section>
+
+  </main>
 </body>
 <script src="options.js"></script>
 

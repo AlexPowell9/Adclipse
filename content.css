@@ -9,7 +9,30 @@
 }
 
 .adclipse-ad * {
-    -webkit-filter: grayscale(100%); /* Safari 6.0 - 9.0 */
+    -webkit-filter: grayscale(100%);
+    /* Safari 6.0 - 9.0 */
     filter: grayscale(100%);
 }
 
+.grayscale * {
+    -webkit-filter: grayscale(100%);
+    /* Safari 6.0 - 9.0 */
+    filter: grayscale(100%);
+}
+
+.border {
+    border: 10px solid red;
+}
+
+.color {
+    background:black;
+}
+
+.label::before {
+    content: "Adclipse Identitfied Ad";
+    font-weight: 900;
+}
+.label {
+    content: "Adclipse Identitfied Ad";
+    font-weight: 900;
+}
