@@ -95,7 +95,7 @@ let getVisibleContainers = (containers) => {
 
 let isVisible = (container) => {
     //TODO make this check if the container is visible
-    return container.style.display != "none";
+    return container.style && container.style.display!="none" && container.style.width && parseInt(container.style.width)>1;
 };
 
 let getAllContainers = () => {
