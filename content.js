@@ -5,8 +5,6 @@
  */
 
 
-
-
 var currentTab = location.href;
 // console.log(currentTab);
 var whitelisted = false;
@@ -90,20 +88,20 @@ let googleDataIdSelector = (containers) => {
 let getVisibleContainers = (containers) => {
 	let vis  = [];
 	containers.forEach((container) => {
-		if(isVisible(container)vis.push(container);
+		if(isVisible(container))vis.push(container);
 	});
 	return vis
 }
 
 let isVisible = (container) => {
-	//TODO make this check if the container is visible
-	return true;
-})
+    //TODO make this check if the container is visible
+    return container.style.display != "none";
+};
 
 let getAllContainers = () => {
 	let containers =[];
 	containers = document.body.getElementsByTagName("*");
-	return containers;
+	return object.values(containers);
 }
 
 /*
