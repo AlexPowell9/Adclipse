@@ -28,12 +28,14 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
         whitelisted = true;
     }
     //getAdsBlocked();
+    let counter = 2;
     highlightAds();
     setInterval(function() {
-       highlightAds();
+       if(counter > 0) highlightAds();
+       counter--;
        setBadge();
        setIcon();
-    }, 2500);
+    }, 3000);
 });
 
 
@@ -62,8 +64,23 @@ function highlightAds() {
     adsBlocked = 0;
     selectContainers().forEach(container => {
         // container.style.border = "10px solid red";
-        if(isAd(container)) container.classList.add("adclipse-ad");
-        adsBlocked++;
+        // if(isAd(container)) container.classList.add("adclipse-ad");
+        // adsBlocked++;
+        try {
+            html2canvas(container).then((canvas) => {
+                let ctx = canvas.getContext('2d');
+                var expanded = ctx.getImageData(0,0, canvas.width, canvas.height);
+                Tesseract.recognize(expanded).then(function(result) {
+                    console.log("TESSERACT RECOGNIZED:", result);
+                    if(result.text.includes("PROMOTED") || result.text.includes("PRDMDVED")) {
+                        container.classList.add("adclipse-ad");
+                    }
+                });
+            });
+        } catch(e) {
+            console.log('html2canvas fucked up');
+        }
+
     });
     console.log('Ads blocked: ' + adsBlocked);
 }
@@ -74,7 +91,8 @@ function highlightAds() {
  * TODO: make this way better
  */
 function selectContainers() {
-    return document.querySelectorAll("[data-google-query-id]");
+    // return document.querySelectorAll("[data-google-query-id]");
+    return document.querySelectorAll("._1poyrkZ7g36PawDueRza-J > article");
 }
 
 /*
