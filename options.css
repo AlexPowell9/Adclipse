@@ -116,7 +116,7 @@ main > input:checked+label {
     user-select: none;
 }
 
-/*Removes decoration from whitelist ul. */
+/* Removes decoration from whitelist ul. */
 #whitelist ul {
     list-style-type: none;
 }

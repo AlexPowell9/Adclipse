@@ -1,3 +1,17 @@
+:root {
+    --grayscaleFactor: 0.5;
+    --colorColor: black;
+    --colorOpacity: 0.5;
+    --borderThickness: 10px;
+    --borderStyle: solid;
+    --borderColor: red;
+    --labelOpacity:1;
+    --labelTextAlign: center;
+    --labelPaddingTop:100%;
+    --labelSize: 12px;
+    --labelColor: black;
+}
+
 .adclipse-ad {
     border: 10px solid red;
     content: "Ad identified by Adclipse";
@@ -14,25 +28,45 @@
     filter: grayscale(100%);
 }
 
-.grayscale * {
-    -webkit-filter: grayscale(100%);
-    /* Safari 6.0 - 9.0 */
-    filter: grayscale(100%);
+.adclipseGrayscale * {
+    filter: grayscale(var(--grayscaleFactor));
 }
 
-.border {
-    border: 10px solid red;
+.adclipseBorder {
+    border: var(--borderThickness) var(--borderStyle) var(--borderColor);
 }
 
-.color {
-    background:black;
+.adclipseColor {
+    position: absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    height:100%;
+    width:100%;
+    z-index: 1000;
+    background: var(--colorColor);
+    opacity: var(--colorOpacity);
 }
 
-.label::before {
-    content: "Adclipse Identitfied Ad";
+
+.adclipseLabel{
+    font-size: var(--labelSize);
+    opacity: var(--labelOpacity);
+    padding-top:var(--labelPaddingTop);
+    text-align: var(--labelTextAlign);
+    color: var(--labelColor);
     font-weight: 900;
+    position: absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    height:100%;
+    width:100%;
+    z-index: 1001;
 }
-.label {
-    content: "Adclipse Identitfied Ad";
-    font-weight: 900;
+
+.adclipseRelative{
+    position: relative;
 }

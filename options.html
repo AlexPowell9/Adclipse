@@ -33,10 +33,72 @@
       </div>
       <h3>Highlighting Options</h3>
       <div>
-        <input type="checkbox" name="grayscale">Grayscale<br>
-        <input type="checkbox" name="color">Color<br>
-        <input type="checkbox" name="border">Border<br>
-        <input type="checkbox" name="Label">Label<br>
+        <!--GrayScale-->
+        <input type="checkbox" name="grayscale"> Grayscale<br>
+        <div id="grayscaleOptions">
+          <div class="slideContainer">
+            Intensity: <input type="range" min="0" max="100" value="50" class="slider" id="grayscaleSlider">
+          </div>
+        </div>
+        <!--Color-->
+        <input type="checkbox" name="color"> Color<br>
+        <div id="colorOptions">
+          <div class="colorContainer">
+            Color: <input type="color" name="color" value="#ff0000" id="colorColor">
+          </div>
+          <div class="slideContainer">
+            Opacity: <input type="range" min="0" max="100" value="50" class="slider" id="colorOpacity">
+          </div>
+        </div>
+        <!--Border-->
+        <input type="checkbox" name="border"> Border<br>
+        <div id="colorOptions">
+          <div class="colorContainer">
+            Color: <input type="color" name="borderColor" value="#ff0000" id="borderColor">
+          </div>
+          <div class="selectContainer">
+            Style: <select id="borderStyle">
+              <option value="solid">Solid</option>
+              <option value="dotted">Dotted</option>
+              <option value="dashed">Dashed</option>
+              <option value="double">Double</option>
+              <option value="groove">Groove</option>
+              <option value="ridge">Ridge</option>
+              <option value="inset">Inset</option>
+              <option value="outset">Outset</option>
+              <option value="hidden">Hidden</option>
+            </select>
+          </div>
+          <div class="slideContainer">
+            Thickness <input type="range" min="0" max="100" value="10" class="slider" id="borderThickness">
+          </div>
+        </div>
+        <!--Label-->
+        <input type="checkbox" name="label"> Label<br>
+        <div id="labelOptions">
+          <div class="slideContainer">
+            Label : <input type="text" value="Adclipse Identified Ad" id="labelText">
+          </div>
+          <div class="slideContainer">
+            Font Size: <input type="range" min="0" max="100" value="12" class="slider" id="labelSize">
+          </div>
+          <div class="selectContainer">
+            Align: <select id="labelTextAlign">
+              <option value="left">Left</option>
+              <option value="center">Center</option>
+              <option value="right">Right</option>
+            </select>
+          </div>
+          <div class="slideContainer">
+            Opacity: <input type="range" min="0" max="100" value="50" class="slider" id="labelOpacity">
+          </div>
+          <div class="slideContainer">
+            Position: <input type="range" min="0" max="200" value="100" class="slider" id="labelPadding">
+          </div>
+          <div class="colorContainer">
+            Color: <input type="color" value="#ff0000" id="labelColor">
+          </div>
+        </div>
       </div>
     </section>
 
