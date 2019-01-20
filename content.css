@@ -47,6 +47,7 @@
     z-index: 1000;
     background: var(--colorColor);
     opacity: var(--colorOpacity);
+    filter:none;
 }
 
 
