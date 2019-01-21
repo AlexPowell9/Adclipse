@@ -23,7 +23,7 @@ body {
     display: flex;
     align-items: left;
     justify-content: left;
-    padding: 40px;
+    padding: 20px;
     font: 14px/1.5 'Open Sans', sans-serif;
     color: #345;
     background: #f0f2f4;
@@ -39,13 +39,20 @@ main {
     border: 1px solid rgba(0, 0, 0, .2);
     background: #fff;
     box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
-    overflow: auto;
+    overflow: hidden;
 }
 
 section {
     display: none;
     padding: 20px 0 0;
     border-top: 1px solid #abc;
+}
+
+.sectionContainer{
+    margin-right:-40px;
+    height:80vh;
+    width:100%;
+    overflow: auto;
 }
 
 main>input {
@@ -87,23 +94,7 @@ main>input:checked+label {
     display: block;
 }
 
-@media screen and (max-width: 800px) {
-    main>label {
-        font-size: 0;
-    }
 
-    main>label:before {
-        margin: 0;
-        font-size: 18px;
-    }
-
-}
-
-@media screen and (max-width: 500px) {
-    main>label {
-        padding: 15px;
-    }
-}
 
 /* 
  * Disable text selection.
@@ -228,4 +219,48 @@ main>input:checked+label {
     -webkit-transform: rotate(45deg);
     -ms-transform: rotate(45deg);
     transform: rotate(45deg);
+}
+
+@media screen and (max-width: 1000px) {
+    main>label {
+        font-size: 18px;
+    }
+
+    main>label:before {
+        margin: 0;
+        font-size: 18px;
+    }
+
+    .section {
+        max-width: 300px;
+    }
+
+}
+
+@media screen and (max-width: 800px) {
+
+    /*Sample Ad */
+    #exampleAd {
+        display:block;
+        width: calc(80% - 250px);
+        clear: both;
+        float: right;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    main>label {
+        padding: 10px;
+    }
+
+    .section {
+        max-width: 250px;
+    }
+    /*Sample Ad */
+    #exampleAd {
+        display:block;
+        width: calc(90% - 250px);
+        clear: both;
+        float: right;
+    }
 }
