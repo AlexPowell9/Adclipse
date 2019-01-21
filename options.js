@@ -7,7 +7,7 @@
 
 
 /*
- * Get Whitelist and display.
+ * Get Whitelist and display as an unordered list.
  */
 var whitelistStorageCopy = [];
 chrome.storage.local.get("whitelist", function (returnedStorage) {
@@ -19,7 +19,7 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
 });
 
 /*
- * Get Visual Options and apply them.
+ * Get Visual Options from storage and apply them.
  */
 var visualStorageCopy = [];
 chrome.storage.local.get("visual", function (returnedStorage) {
@@ -30,13 +30,14 @@ chrome.storage.local.get("visual", function (returnedStorage) {
         visualStorageCopy = getDefaults();
         updateVisualStorage();
     }
-    console.log(visualStorageCopy);
     adclipseLabel = visualStorageCopy.label.text;
     initializeCheckboxes();
     initializeOptions();
 });
 
-
+/*
+* Wrapper that updates Visual Options in storage with current copy.
+*/
 function updateVisualStorage() {
     chrome.storage.local.set({
         "visual": JSON.stringify(visualStorageCopy)
@@ -47,7 +48,7 @@ function updateVisualStorage() {
 }
 
 /*
- * Return array of default option values.
+ * Return array of default option values, for when there are no options present in storage.
  */
 function getDefaults() {
     var storage = {};
