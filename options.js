@@ -77,7 +77,7 @@ function getDefaults() {
         "fontSize": 10,
         "textAlign": "center",
         "opacity": 0.5,
-        "paddingTop": 100,
+        "textTop": 40,
         "color": "#000000"
     };
     return storage;
@@ -230,8 +230,11 @@ function initializeCheckboxes() {
     function labelChecked(checked) {
         if (checked) {
             var newDiv = document.createElement("div");
-            newDiv.textContent = adclipseLabel;
+            var textDiv = document.createElement("div");
+            textDiv.textContent = adclipseLabel;
+            textDiv.classList.add("adclipseLabelText");
             newDiv.classList.add("adclipseLabel");
+            newDiv.appendChild(textDiv);
             element.appendChild(newDiv);
             element.classList.add("adclipseRelative");
         } else {
@@ -397,18 +400,18 @@ function initializeOptions() {
     }
 
     /*
-     * Label Padding Top Slider
+     * Label Text Top Slider
      */
     //Get current value from options and set css variable, slider
-    body.style.setProperty('--labelPaddingTop', visualStorageCopy.label.paddingTop + "%");
-    var labelPaddingSlider = document.getElementById("labelPaddingTop");
-    labelPaddingSlider.value = visualStorageCopy.label.paddingTop;
+    body.style.setProperty('--labelTextTop', visualStorageCopy.label.textTop + "%");
+    var labelPaddingSlider = document.getElementById("labelTextTop");
+    labelPaddingSlider.value = visualStorageCopy.label.textTop;
     //Listener
     labelPaddingSlider.oninput = function () {
         //Set CSS Variable for visible changes
-        body.style.setProperty('--labelPaddingTop', this.value + "%");
+        body.style.setProperty('--labelTextTop', this.value + "%");
         //Set and Store changes
-        visualStorageCopy.label.paddingTop = this.value;
+        visualStorageCopy.label.textTop = this.value;
         updateVisualStorage();
     }
 
