@@ -96,6 +96,7 @@ main>input:checked+label {
         margin: 0;
         font-size: 18px;
     }
+
 }
 
 @media screen and (max-width: 500px) {
@@ -140,23 +141,27 @@ main>input:checked+label {
     padding: 10px;
 }
 
-.slideContainer{
+.slideContainer {
     line-height: 12px;
 }
 
-.slideContainer>label{
-    vertical-align:middle;
-}
-.slideContainer>input{
-    vertical-align:middle;
+.slideContainer>label {
+    vertical-align: middle;
 }
 
-.setting{
-    margin:15px;
+.slideContainer>input {
+    vertical-align: middle;
+}
+
+.setting {
+    margin: 15px;
 }
 
 
-/*https://www.w3schools.com/howto/howto_css_custom_checkbox.asp*/
+/*
+* Nice checkboxes.
+* https://www.w3schools.com/howto/howto_css_custom_checkbox.asp
+*/
 
 /* Customize the label (the container) */
 .container {
@@ -224,4 +229,3 @@ main>input:checked+label {
     -ms-transform: rotate(45deg);
     transform: rotate(45deg);
 }
-

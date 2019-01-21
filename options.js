@@ -8,16 +8,80 @@
 
 /*
  * Get Whitelist and display.
- *
  */
-var storageCopy = [];
+var whitelistStorageCopy = [];
 chrome.storage.local.get("whitelist", function (returnedStorage) {
     if (returnedStorage['whitelist'] !== undefined) {
-        storageCopy = returnedStorage['whitelist'];
+        whitelistStorageCopy = returnedStorage['whitelist'];
     }
-    console.log(storageCopy);
-    document.getElementById("whitelist").appendChild(makeUL(storageCopy));
+    console.log(whitelistStorageCopy);
+    document.getElementById("whitelist").appendChild(makeUL(whitelistStorageCopy));
 });
+
+/*
+ * Get Visual Options and apply them.
+ */
+var visualStorageCopy = [];
+chrome.storage.local.get("visual", function (returnedStorage) {
+    if (returnedStorage['visual'] !== undefined) {
+        visualStorageCopy = JSON.parse(returnedStorage['visual']);
+    } else {
+        //Does not exist, so we create it with defaults
+        visualStorageCopy = getDefaults();
+        updateVisualStorage();
+    }
+    console.log(visualStorageCopy);
+    adclipseLabel = visualStorageCopy.label.text;
+    initializeCheckboxes();
+    initializeOptions();
+});
+
+
+function updateVisualStorage() {
+    chrome.storage.local.set({
+        "visual": JSON.stringify(visualStorageCopy)
+    }, function () {
+        //Callback
+        console.log("Visual Settings Updated!");
+    });
+}
+
+/*
+ * Return array of default option values.
+ */
+function getDefaults() {
+    var storage = {};
+    //Grayscale
+    storage.grayscale = {
+        "active": true,
+        "factor": 0.5
+    };
+    //Color
+    storage.color = {
+        "active": false,
+        "color": "#000000",
+        "opacity": 0.5
+    };
+    //Border
+    storage.border = {
+        "active": false,
+        "color": "#ff0000",
+        "style": "solid",
+        "thickness": 10
+    };
+    //Label
+    storage.label = {
+        "active": false,
+        "text": "Adclipse Identified Ad",
+        "fontSize": 10,
+        "textAlign": "center",
+        "opacity": 0.5,
+        "paddingTop": 100,
+        "color": "#000000"
+    };
+    return storage;
+}
+
 
 /*
  * Make an unordered list.
@@ -43,165 +107,358 @@ function makeUL(array) {
 
 
 /*
- * Listeners for checkbox changes.
+ * Function to initialize listeners for checkbox changes.
  *
  * Pattern from : https://stackoverflow.com/questions/14544104/checkbox-check-event-listener
  */
-var checkbox = document.querySelector("input[name=grayscale]");
-var grayscaleEnabled = false;
-//Grayscale
-checkbox.addEventListener('change', function () {
+var adclipseLabel = "Adclipse";
+
+function initializeCheckboxes() {
+
+    //The fake ad that is used to illustrate the blocking
     var element = document.getElementById("exampleAd");
-    if (this.checked) {
-        // Checkbox is checked..
-        element.classList.add("adclipseGrayscale");
 
-    } else {
-        // Checkbox is not checked..
-        element.classList.remove("adclipseGrayscale");
-    }
-});
-
-/*
- * To make Label and color work properly I took overlay inspiration from below: 
- * https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_image_overlay_fade
- */
-
-//Color
-checkbox = document.querySelector("input[name=color]");
-checkbox.addEventListener('change', function () {
-    var element = document.getElementById("exampleAd");
-    if (this.checked) {
-        // Checkbox is checked..
-        var newDiv = document.createElement("div");
-        newDiv.classList.add("adclipseColor");
-        element.appendChild(newDiv);
-        element.classList.add("adclipseRelative");
-    } else {
-        // Checkbox is not checked..
-        var divs = element.getElementsByClassName("adclipseColor");
-        //No idea why foreach wont work here but I tried like 6 times.
-        for (var i = 0; i < divs.length; i++) {
-            divs[0].remove();
+    /*
+     * Grayscale
+     */
+    //This checkbox variable gets reused for all checkboxes to avoid extra variable creation
+    var checkbox = document.querySelector("input[name=grayscale]");
+    //Handle check states for grayscale
+    function grayscaleChecked(checked) {
+        if (checked) {
+            element.classList.add("adclipseGrayscale");
+        } else {
+            element.classList.remove("adclipseGrayscale");
         }
     }
-});
-
-//Border
-checkbox = document.querySelector("input[name=border]");
-checkbox.addEventListener('change', function () {
-    var element = document.getElementById("exampleAd");
-    if (this.checked) {
-        // Checkbox is checked..
-        element.classList.add("adclipseBorder");
-    } else {
-        // Checkbox is not checked..
-        element.classList.remove("adclipseBorder");
+    //Initialize Grayscale
+    if (visualStorageCopy.grayscale.active) {
+        checkbox.checked = true;
+        grayscaleChecked(true);
     }
-});
-var adclipseLabel="Adclipse";
+    //Add listener grayscale
+    checkbox.addEventListener('change', function () {
+        if (this.checked) {
+            // Checkbox is checked..
+            grayscaleChecked(true);
+        } else {
+            // Checkbox is not checked..
+            grayscaleChecked(false)
+        }
+        visualStorageCopy.grayscale.active = this.checked;
+        updateVisualStorage();
+    });
 
-//Label
-checkbox = document.querySelector("input[name=label]");
-checkbox.addEventListener('change', function () {
-    var element = document.getElementById("exampleAd");
-    if (this.checked) {
-        // Checkbox is checked..
-        var newDiv = document.createElement("div");
-        newDiv.textContent = adclipseLabel;
-        newDiv.classList.add("adclipseLabel");
-        element.appendChild(newDiv);
-        element.classList.add("adclipseRelative");
-    } else {
-        // Checkbox is not checked..
-        var divs = element.getElementsByClassName("adclipseLabel");
-        //No idea why foreach wont work here but I tried like 6 times.
-        for (var i = 0; i < divs.length; i++) {
-            divs[0].remove();
+    /*
+     * Color
+     */
+    checkbox = document.querySelector("input[name=color]");
+    //Handle check states for color
+    function colorChecked(checked) {
+        /*
+         * To make Label and color work properly I took overlay inspiration from below: 
+         * https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_image_overlay_fade
+         */
+        if (checked) {
+            var newDiv = document.createElement("div");
+            newDiv.classList.add("adclipseColor");
+            element.appendChild(newDiv);
+            element.classList.add("adclipseRelative");
+        } else {
+            var divs = element.getElementsByClassName("adclipseColor");
+            //No idea why foreach wont work here but I tried like 6 times.
+            for (var i = 0; i < divs.length; i++) {
+                divs[0].remove();
+            }
         }
     }
-});
+    //Initialize Color
+    if (visualStorageCopy.color.active) {
+        checkbox.checked = true;
+        colorChecked(true);
+    }
+    //Add listener color
+    checkbox.addEventListener('change', function () {
+        if (this.checked) {
+            // Checkbox is checked..
+            colorChecked(true);
+        } else {
+            // Checkbox is not checked..
+            colorChecked(false);
+        }
+        visualStorageCopy.color.active = this.checked;
+        updateVisualStorage();
+    });
 
-const body = document.querySelector('body');
+    /*
+     * Border
+     */
+    checkbox = document.querySelector("input[name=border]");
+    //Handle check states for border
+    function borderChecked(checked) {
+        if (checked) {
+            element.classList.add("adclipseBorder");
+        } else {
+            element.classList.remove("adclipseBorder");
+        }
+    }
+    //Initialize Border
+    if (visualStorageCopy.border.active) {
+        checkbox.checked = true;
+        borderChecked(true);
+    }
+    //Add listener border
+    checkbox.addEventListener('change', function () {
+        if (this.checked) {
+            // Checkbox is checked..
+            borderChecked(true);
+        } else {
+            // Checkbox is not checked..
+            borderChecked(false);
+        }
+        visualStorageCopy.border.active = this.checked;
+        updateVisualStorage();
+    });
+
+
+    /*
+     * Label
+     */
+    checkbox = document.querySelector("input[name=label]");
+    //Handle check states for label
+    function labelChecked(checked) {
+        if (checked) {
+            var newDiv = document.createElement("div");
+            newDiv.textContent = adclipseLabel;
+            newDiv.classList.add("adclipseLabel");
+            element.appendChild(newDiv);
+            element.classList.add("adclipseRelative");
+        } else {
+            var divs = element.getElementsByClassName("adclipseLabel");
+            //No idea why foreach wont work here but I tried like 6 times.
+            for (var i = 0; i < divs.length; i++) {
+                divs[0].remove();
+            }
+        }
+    }
+    //Initialize Label
+    if (visualStorageCopy.label.active) {
+        checkbox.checked = true;
+        labelChecked(true);
+    }
+    //Add listener label
+    checkbox.addEventListener('change', function () {
+        if (this.checked) {
+            // Checkbox is checked..
+            labelChecked(true);
+        } else {
+            // Checkbox is not checked..
+            labelChecked(false);
+        }
+        visualStorageCopy.label.active = this.checked;
+        updateVisualStorage();
+    });
+
+}
 
 /*
  * Event listeners for various options under checkboxes.
  */
+const body = document.querySelector('body');
 
-//Greyscale Slider
-var slider1 = document.getElementById("grayscaleSlider");
-slider1.oninput = function () {
-    body.style.setProperty('--grayscaleFactor', this.value / 100);
-}
+function initializeOptions() {
+    /*
+     * Greyscale Factor Slider
+     */
+    //Get current value from options and set css variable, slider
+    body.style.setProperty('--grayscaleFactor', visualStorageCopy.grayscale.factor / 100);
+    var grayscaleFactorSlider = document.getElementById("grayscaleSlider");
+    grayscaleFactorSlider.value = visualStorageCopy.grayscale.factor;
+    //Listener
+    grayscaleFactorSlider.oninput = function () {
+        //Set CSS Variable for visible changes
+        body.style.setProperty('--grayscaleFactor', this.value / 100);
+        //Set and Store changes
+        visualStorageCopy.grayscale.factor = this.value;
+        updateVisualStorage();
+    }
 
-//Color Slider
-var slider2 = document.getElementById("colorOpacity");
-slider2.oninput = function () {
-    body.style.setProperty('--colorOpacity', this.value / 100);
-}
+    /*
+     * Color Opacity Slider
+     */
+    //Get current value from options and set css variable, slider
+    body.style.setProperty('--colorOpacity', visualStorageCopy.color.opacity / 100);
+    var colorOpacitySlider = document.getElementById("colorOpacity");
+    colorOpacitySlider.value = visualStorageCopy.color.opacity;
+    //Listener
+    colorOpacitySlider.oninput = function () {
+        //Set CSS Variable for visible changes
+        body.style.setProperty('--colorOpacity', this.value / 100);
+        //Set and Store changes
+        visualStorageCopy.color.opacity = this.value;
+        updateVisualStorage();
+    }
 
-//Color ColorPicker
-var colorPicker1 = document.getElementById("colorColor");
-colorPicker1.oninput = function () {
-    body.style.setProperty('--colorColor', this.value);
-}
+    /*
+     * Color Color Picker
+     */
+    //Get current value from options and set css variable, colorpicker
+    body.style.setProperty('--colorColor', visualStorageCopy.color.color);
+    var colorColorPicker = document.getElementById("colorColor");
+    colorColorPicker.value = visualStorageCopy.color.color;
+    //Listener
+    colorColorPicker.oninput = function () {
+        //Set CSS Variable for visible changes
+        body.style.setProperty('--colorColor', this.value);
+        //Set and Store changes
+        visualStorageCopy.color.color = this.value;
+        updateVisualStorage();
+    }
 
-//Border Slider
-var slider3 = document.getElementById("borderThickness");
-slider3.oninput = function () {
-    body.style.setProperty('--borderThickness', this.value + "px");
-}
+    /*
+     * Border Thickness Slider
+     */
+    //Get current value from options and set css variable, slider
+    body.style.setProperty('--borderThickness', visualStorageCopy.border.thickness + "px");
+    var borderThicknessSlider = document.getElementById("borderThickness");
+    borderThicknessSlider.value = visualStorageCopy.border.thickness;
+    //Listener
+    borderThicknessSlider.oninput = function () {
+        //Set CSS Variable for visible changes
+        body.style.setProperty('--borderThickness', this.value + "px");
+        //Set and Store changes
+        visualStorageCopy.border.thickness = this.value;
+        updateVisualStorage();
+    }
 
-//Border Style DropDown
-var dropdown1 = document.getElementById("borderStyle");
-dropdown1.oninput = function () {
-    body.style.setProperty('--borderStyle', this.value);
-}
+    /*
+     * Border Style Dropdown
+     */
+    //Get current value from options and set css variable, dropdown
+    body.style.setProperty('--borderStyle', visualStorageCopy.border.style);
+    var borderStyleDropdown = document.getElementById("borderStyle");
+    borderStyleDropdown.value = visualStorageCopy.border.style;
+    //Listener
+    borderStyleDropdown.oninput = function () {
+        //Set CSS Variable for visible changes
+        body.style.setProperty('--borderStyle', this.value);
+        //Set and Store changes
+        visualStorageCopy.border.style = this.value;
+        updateVisualStorage();
+    }
 
-//Border ColorPicker
-var colorPicker2 = document.getElementById("borderColor");
-colorPicker2.oninput = function () {
-    body.style.setProperty('--borderColor', this.value);
-}
+    /*
+     * Border Color Colorpicker
+     */
+    //Get current value from options and set css variable, picker
+    body.style.setProperty('--borderColor', visualStorageCopy.border.color);
+    var borderColorPicker = document.getElementById("borderColor");
+    borderColorPicker.value = visualStorageCopy.border.color;
+    //Listener
+    borderColorPicker.oninput = function () {
+        //Set CSS Variable for visible changes
+        body.style.setProperty('--borderColor', this.value);
+        //Set and Store changes
+        visualStorageCopy.border.color = this.value;
+        updateVisualStorage();
+    }
 
-//Label Font Slider
-var slider4 = document.getElementById("labelSize");
-slider4.oninput = function () {
-    body.style.setProperty('--labelSize', this.value + "px");
-}
+    /*
+     * Label Font Size Slider
+     */
+    //Get current value from options and set css variable, slider
+    body.style.setProperty('--labelFontSize', visualStorageCopy.label.fontSize + "px");
+    var labelFontSizeSlider = document.getElementById("labelFontSize");
+    labelFontSizeSlider.value = visualStorageCopy.label.fontSize;
+    //Listener
+    labelFontSizeSlider.oninput = function () {
+        //Set CSS Variable for visible changes
+        body.style.setProperty('--labelFontSize', this.value + "px");
+        //Set and Store changes
+        visualStorageCopy.label.fontSize = this.value;
+        updateVisualStorage();
+    }
 
-//Label Opacity Slider
-var slider5 = document.getElementById("labelOpacity");
-slider5.oninput = function () {
-    body.style.setProperty('--labelOpacity', this.value/100);
-}
+    /*
+     * Label Opacity Slider
+     */
+    //Get current value from options and set css variable, slider
+    body.style.setProperty('--labelOpacity', visualStorageCopy.label.opacity / 100);
+    var labelOpacitySlider = document.getElementById("labelOpacity");
+    labelOpacitySlider.value = visualStorageCopy.label.opacity;
+    //Listener
+    labelOpacitySlider.oninput = function () {
+        //Set CSS Variable for visible changes
+        body.style.setProperty('--labelOpacity', this.value / 100);
+        //Set and Store changes
+        visualStorageCopy.label.opacity = this.value;
+        updateVisualStorage();
+    }
 
-//Label Padding Slider
-var slider6 = document.getElementById("labelPadding");
-slider6.oninput = function () {
-    body.style.setProperty('--labelPaddingTop', this.value+"%");
-}
+    /*
+     * Label Padding Top Slider
+     */
+    //Get current value from options and set css variable, slider
+    body.style.setProperty('--labelPaddingTop', visualStorageCopy.label.paddingTop + "%");
+    var labelPaddingSlider = document.getElementById("labelPaddingTop");
+    labelPaddingSlider.value = visualStorageCopy.label.paddingTop;
+    //Listener
+    labelPaddingSlider.oninput = function () {
+        //Set CSS Variable for visible changes
+        body.style.setProperty('--labelPaddingTop', this.value + "%");
+        //Set and Store changes
+        visualStorageCopy.label.paddingTop = this.value;
+        updateVisualStorage();
+    }
 
-//Label Text Align DropDown
-var dropdown2 = document.getElementById("labelTextAlign");
-dropdown2.oninput = function () {
-    body.style.setProperty('--labelTextAlign', this.value);
-}
+    /*
+     * Label Text Align Dropdown
+     */
+    //Get current value from options and set css variable, dropdown
+    body.style.setProperty('--labelTextAlign', visualStorageCopy.label.textAlign);
+    var labelTextAlignDropdown = document.getElementById("labelTextAlign");
+    labelTextAlignDropdown.value = visualStorageCopy.label.textAlign;
+    //Listener
+    labelTextAlignDropdown.oninput = function () {
+        //Set CSS Variable for visible changes
+        body.style.setProperty('--labelTextAlign', this.value);
+        //Set and Store changes
+        visualStorageCopy.label.textAlign = this.value;
+        updateVisualStorage();
+    }
 
-//Label ColorPicker
-var colorPicker3 = document.getElementById("labelColor");
-colorPicker3.oninput = function () {
-    body.style.setProperty('--labelColor', this.value);
-}
+    /*
+     * Label Color ColorPicker
+     */
+    //Get current value from options and set css variable, picker
+    body.style.setProperty('--labelColor', visualStorageCopy.label.color);
+    var labelColorPicker = document.getElementById("labelColor");
+    labelColorPicker.value = visualStorageCopy.label.color;
+    //Listener
+    labelColorPicker.oninput = function () {
+        //Set CSS Variable for visible changes
+        body.style.setProperty('--labelColor', this.value);
+        //Set and Store changes
+        visualStorageCopy.label.color = this.value;
+        updateVisualStorage();
+    }
 
-//Label Text
-var text1 = document.getElementById("labelText");
-text1.oninput = function () {
-    adclipseLabel= this.value;
-    var element = document.getElementById("exampleAd");
-    var divs = element.getElementsByClassName("adclipseLabel");
-        //No idea why foreach wont work here but I tried like 6 times.
+    /*
+     * Label Text
+     */
+    var labelText = document.getElementById("labelText");
+    labelText.value = visualStorageCopy.label.text;
+    //Listener
+    labelText.oninput = function () {
+        adclipseLabel = this.value;
+        var element = document.getElementById("exampleAd");
+        var divs = element.getElementsByClassName("adclipseLabel");
+        //Update labels on all ads. No idea why foreach wont work here but I tried like 6 times.
         for (var i = 0; i < divs.length; i++) {
             divs[0].textContent = adclipseLabel;
         }
+        //Set and Store changes
+        visualStorageCopy.label.text = this.value;
+        updateVisualStorage();
+    }
 }

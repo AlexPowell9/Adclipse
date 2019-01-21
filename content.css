@@ -8,7 +8,7 @@
     --labelOpacity:1;
     --labelTextAlign: center;
     --labelPaddingTop:100%;
-    --labelSize: 12px;
+    --labelFontSize: 12px;
     --labelColor: black;
 }
 
@@ -52,7 +52,7 @@
 
 
 .adclipseLabel{
-    font-size: var(--labelSize);
+    font-size: var(--labelFontSize);
     opacity: var(--labelOpacity);
     padding-top:var(--labelPaddingTop);
     text-align: var(--labelTextAlign);
