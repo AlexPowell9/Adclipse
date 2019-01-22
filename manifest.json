@@ -34,6 +34,6 @@
         "128": "images/AdclipseIcon128_alt4.png"
     },
     "options_page": "options.html",
-    "permissions": ["tabs", "storage"],
+    "permissions": ["tabs", "activeTab", "<all_urls>", "storage"],
     "manifest_version": 2
 }

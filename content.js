@@ -29,13 +29,15 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
     }
     //getAdsBlocked();
     let counter = 2;
-    highlightAds();
+    setTimeout(() => {
+        highlightAds();
+    }, 3000);
     setInterval(function() {
        if(counter > 0) highlightAds();
        counter--;
        setBadge();
        setIcon();
-    }, 3000);
+    }, 5000);
 });
 
 
@@ -66,24 +68,56 @@ function highlightAds() {
         // container.style.border = "10px solid red";
         // if(isAd(container)) container.classList.add("adclipse-ad");
         // adsBlocked++;
-        try {
-            html2canvas(container).then((canvas) => {
-                let ctx = canvas.getContext('2d');
-                var expanded = ctx.getImageData(0,0, canvas.width, canvas.height);
-                Tesseract.recognize(expanded).then(function(result) {
-                    console.log("TESSERACT RECOGNIZED:", result);
-                    if(result.text.includes("PROMOTED") || result.text.includes("PRDMDVED")) {
-                        container.classList.add("adclipse-ad");
-                    }
+        console.log(container);
+        if(container !== null && container !== undefined && container !== "") {
+            try {
+                html2canvas(container).then((canvas) => {
+                    let ctx = canvas.getContext('2d');
+                    var expanded = ctx.getImageData(0,0, canvas.width, canvas.height);
+                    Tesseract.recognize(expanded).then(function(result) {
+                        console.log("TESSERACT RECOGNIZED:", result);
+                        if(result.text.includes("PROMOTED") 
+                            || result.text.includes("PRDMDVED")
+                            || result.text.includes("ADVERTISEMENT")
+                            || result.text.includes("Anvzmsmm")
+                            ) {
+                            container.classList.add("adclipse-ad");
+                        }
+                    });
                 });
-            });
-        } catch(e) {
-            console.log('html2canvas fucked up');
+            } catch(e) {
+                console.log('html2canvas fucked up');
+            }
         }
+
+        // let pos = offset(container);
+        // if(pos.top <= 1920 || pos.left <= 1080) {
+        //     let ele = { chromeAction: "screenshot", x: pos.top, y: pos.left, w: 500, h: 300 };
+        //     // console.log(ele);
+        //     chrome.runtime.sendMessage(ele, {}, function(res) {
+        //         console.log("image", res.image);
+        //     });    
+        // }
+
 
     });
     console.log('Ads blocked: ' + adsBlocked);
 }
+
+function offset(element) {
+    var top = 0, left = 0;
+    do {
+        top += element.offsetTop  || 0;
+        left += element.offsetLeft || 0;
+        element = element.offsetParent;
+    } while(element);
+
+    return {
+        top: top,
+        left: left
+    };
+}
+
 
 /*
  * Select Candidate Containers
@@ -92,7 +126,8 @@ function highlightAds() {
  */
 function selectContainers() {
     // return document.querySelectorAll("[data-google-query-id]");
-    return document.querySelectorAll("._1poyrkZ7g36PawDueRza-J > article");
+    // return document.querySelectorAll("._1poyrkZ7g36PawDueRza-J > article");
+    return document.querySelectorAll(".ii4q9d-0");
 }
 
 /*
