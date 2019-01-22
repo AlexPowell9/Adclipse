@@ -44,7 +44,7 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
     if (returnedStorage['whitelist'] !== undefined) {
         storageCopy = returnedStorage['whitelist'];
     }
-    var d = extractRootDomain(currentTab);
+    var d = extractHostname(currentTab);
     // console.log(d);
     //Whitelisted.
     if (storageCopy.indexOf(d) != -1) {
