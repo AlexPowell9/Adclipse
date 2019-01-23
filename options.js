@@ -13,12 +13,11 @@
 var myCodeMirror = CodeMirror.fromTextArea(document.getElementById("whitelist"), {
     lineNumbers: true,
     gutter: true,
-    lineWrapping: true
+    lineWrapping: true,
 });
 
 //We need to do this because the whitelist is originally hidden.
 document.getElementById("tab3").addEventListener("click", function () {
-    myCodeMirror.setSize("100%", "100%");
     myCodeMirror.refresh();
 });
 
