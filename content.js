@@ -93,6 +93,20 @@ let getVisibleContainers = (containers) => {
 	return vis
 }
 
+let treeIterators = {
+    findMinimalDepthAtPoint: (document, point) => {
+        return findMinDepthRecursive(document.body);
+    },
+    findMinDepthRecursive: (node, point) => {
+        if(node.isAtPoint(point)){
+            node.children.forEach((node) => {
+                if(node.isAtPoint(point))
+            })
+            return MinDepthRecursive(nod)
+        }  
+    }
+}
+
 let isVisible = (container) => {
     //TODO make this check if the container is visible
     return container.style && container.style.display!="none" && container.style.width && parseInt(container.style.width)>1;
@@ -100,7 +114,8 @@ let isVisible = (container) => {
 
 let getAllContainers = () => {
 	let containers =[];
-	containers = document.body.getElementsByTagName("*");
+	//TODO change this, ineffiecent
+    containers = document.body.getElementsByTagName("*");
 	return object.values(containers);
 }
 
