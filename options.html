@@ -7,8 +7,13 @@
 <head>
   <title>Adclipse Options</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!--The below are for Code Mirror. -->
+  <script src="external/codeMirror/lib/codemirror.js"></script>
+  <link rel="stylesheet" href="external/codeMirror/lib/codemirror.css">
+  <!--The below are for the extension-->
   <link href="options.css" rel="stylesheet">
   <link href="content.css" rel="stylesheet">
+
 </head>
 
 <body>
@@ -24,7 +29,7 @@
     <input id="tab3" type="radio" name="tabs" class="disable-select">
     <label for="tab3" class="disable-select">Whitelist</label>
 
-    <!--Tab Content-->
+    <!--Visual Setting Tab Content-->
     <section id="content1">
       <div class="sectionContainer">
         <div>
@@ -137,15 +142,25 @@
       </div>
     </section>
 
+    <!--Detection Setting Tab-->
     <section id="content2">
       <div class="sectionContainer">
         <p> There's nothing here yet! </p>
       </div>
     </section>
 
+    <!--Whitelist Content Tab-->
     <section id="content3">
       <div class="sectionContainer">
-        <div id="whitelist">
+        <h3>Whitelist</h3>
+        <div class="whitelistButtons">
+          <button id="whitelistApply" class="button" disabled>Apply Changes</button>
+          <button id="whitelistCancel" class="button" disabled>Cancel</button>
+        </div>
+        <div class="codeBox">
+          <form>
+            <textarea name="whitelist" id="whitelist"></textarea>
+          </form>
         </div>
       </div>
     </section>

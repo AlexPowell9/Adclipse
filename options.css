@@ -48,10 +48,10 @@ section {
     border-top: 1px solid #abc;
 }
 
-.sectionContainer{
-    margin-right:-40px;
-    height:80vh;
-    width:100%;
+.sectionContainer {
+    margin-right: -40px;
+    height: 80vh;
+    width: 100%;
     overflow: auto;
 }
 
@@ -108,11 +108,6 @@ main>input:checked+label {
     user-select: none;
 }
 
-/* Removes decoration from whitelist ul. */
-#whitelist ul {
-    list-style-type: none;
-}
-
 /*Sample Ad */
 #exampleAd {
     clear: left;
@@ -132,6 +127,21 @@ main>input:checked+label {
     padding: 10px;
 }
 
+.codeBox {
+    border: 1px solid rgba(0, 0, 0, .2);
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
+    max-width: 800px;
+    margin: 25px;
+    padding: 0px;
+    height:50vh;
+    overflow:auto;
+}
+
+.whitelistButtons {
+    margin: 25px 25px 0 25px;
+}
+
 .slideContainer {
     line-height: 12px;
 }
@@ -146,6 +156,41 @@ main>input:checked+label {
 
 .setting {
     margin: 15px;
+}
+
+#whitelistApply {
+    background-color: #2196F3;
+    color: white;
+
+}
+
+#whitelistCancel{
+    background-color: #cccccc;
+    color: #666666;
+}
+
+button{
+    border: 1px solid #999999;
+    filter: brightness(0.95);
+    padding: 7px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:disabled,
+button[disabled] {
+    border: 1px solid #999999;
+    background-color: #cccccc !important;
+    color: #666666 !important;
+    filter:none;
+    cursor: default;
+}
+
+.button:hover {
+    filter: none;
 }
 
 
@@ -194,6 +239,7 @@ main>input:checked+label {
 /* When the checkbox is checked, add a blue background */
 .container input:checked~.checkmark {
     background-color: #2196F3;
+
 }
 
 /* Create the checkmark/indicator (hidden when not checked) */
@@ -241,7 +287,7 @@ main>input:checked+label {
 
     /*Sample Ad */
     #exampleAd {
-        display:block;
+        display: block;
         width: calc(80% - 250px);
         clear: both;
         float: right;
@@ -256,9 +302,10 @@ main>input:checked+label {
     .section {
         max-width: 250px;
     }
+
     /*Sample Ad */
     #exampleAd {
-        display:block;
+        display: block;
         width: calc(90% - 250px);
         clear: both;
         float: right;
