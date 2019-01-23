@@ -10,6 +10,29 @@
 var currentTab = location.href;
 // console.log(currentTab);
 var whitelisted = false;
+//This is the label we use if the label option is applied. We update this to be the same as storage.
+var adclipseLabel = "Adclipse";
+
+/*
+ * Get Visual Options from storage and apply them.
+ */
+var visualStorageCopy = [];
+chrome.storage.local.get("visual", function (returnedStorage) {
+    if (returnedStorage['visual'] !== undefined) {
+        visualStorageCopy = JSON.parse(returnedStorage['visual']);
+    } else {
+        //Does not exist, so we create it with defaults
+        visualStorageCopy = getDefaults();
+        chrome.storage.local.set({
+            "visual": JSON.stringify(visualStorageCopy)
+        }, function () {
+            //Callback
+            console.log("Visual Settings Updated!");
+        });
+    }
+    adclipseLabel = visualStorageCopy.label.text;
+    applyVisualOptions();
+});
 
 /*
  * Check if domain is whitelisted, change display accordingly.
@@ -21,19 +44,24 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
     if (returnedStorage['whitelist'] !== undefined) {
         storageCopy = returnedStorage['whitelist'];
     }
-    var d = extractRootDomain(currentTab);
+    var d = extractHostname(currentTab);
     // console.log(d);
     //Whitelisted.
     if (storageCopy.indexOf(d) != -1) {
         whitelisted = true;
+        adsBlocked = 0;
+        setBadge();
+        setIcon();
+    } else {
+        highlightAds();
+        setInterval(function () {
+            highlightAds();
+            setBadge();
+            setIcon();
+        }, 2500);
     }
     //getAdsBlocked();
-    highlightAds();
-    setInterval(function() {
-       highlightAds();
-       setBadge();
-       setIcon();
-    }, 2500);
+
 });
 
 
@@ -62,8 +90,55 @@ function highlightAds() {
     adsBlocked = 0;
     selectContainers().forEach(container => {
         // container.style.border = "10px solid red";
-        if(isAd(container)) container.classList.add("adclipse-ad");
-        adsBlocked++;
+        if (isAd(container)) {
+            if (visualStorageCopy.grayscale.active) {
+                if (!container.classList["adclipseGrayscale"]) {
+                    container.classList.add("adclipseGrayscale");
+                }
+            }
+            if (visualStorageCopy.color.active) {
+                //This is ugly. We first remove all the color containers, and then add new ones.
+                var divs = container.getElementsByClassName("adclipseColor");
+                //No idea why foreach wont work here but I tried like 6 times.
+                for (var i = 0; i < divs.length; i++) {
+                    divs[0].remove();
+                }
+                //Add new ones. This is needed because it has to be a child for the css rules to work.
+                var newDiv = document.createElement("div");
+                newDiv.classList.add("adclipseColor");
+                container.appendChild(newDiv);
+                if (!container.classList["adclipseRelative"]) {
+                    container.classList.add("adclipseRelative");
+                }
+            }
+            if (visualStorageCopy.border.active) {
+                if (!container.classList["adclipseBorder"]) {
+                    container.classList.add("adclipseBorder");
+                }
+            }
+            if (visualStorageCopy.label.active) {
+                //This is ugly. We first remove all the color containers, and then add new ones.
+                var divs = container.getElementsByClassName("adclipseLabel");
+                //No idea why foreach wont work here but I tried like 6 times.
+                for (var i = 0; i < divs.length; i++) {
+                    divs[0].remove();
+                }
+                //Add two new divs, one for the container, and one for the text.
+                var newDiv = document.createElement("div");
+                var textDiv = document.createElement("div");
+                textDiv.textContent = adclipseLabel;
+                textDiv.classList.add("adclipseLabelText");
+                newDiv.classList.add("adclipseLabel");
+                newDiv.appendChild(textDiv);
+                container.appendChild(newDiv);
+                container.classList.add("adclipseRelative");
+                if (!container.classList["adclipseRelative"]) {
+                    container.classList.add("adclipseRelative");
+                }
+            }
+
+            adsBlocked++;
+        }
     });
     console.log('Ads blocked: ' + adsBlocked);
 }
@@ -83,7 +158,7 @@ function selectContainers() {
  * TODO: make this actually detect if the container is an ad
  */
 function isAd(container) {
-    if(container.style.width === "1px") return false;
+    if (container.style.width === "1px") return false;
     else return true;
 }
 
@@ -140,6 +215,75 @@ chrome.runtime.onMessage.addListener(
                 adCount: "" + adsBlocked
             });
     });
+
+
+/*
+ * Apply visual options from storage.
+ */
+function applyVisualOptions() {
+    const body = document.querySelector('body');
+    /* 
+     * GrayScale Options
+     */
+    body.style.setProperty('--grayscaleFactor', visualStorageCopy.grayscale.factor / 100);
+    /* 
+     * Color Options
+     */
+    body.style.setProperty('--colorOpacity', visualStorageCopy.color.opacity / 100);
+    body.style.setProperty('--colorColor', visualStorageCopy.color.color);
+    /* 
+     * Border Options
+     */
+    body.style.setProperty('--borderThickness', visualStorageCopy.border.thickness + "px");
+    body.style.setProperty('--borderStyle', visualStorageCopy.border.style);
+    body.style.setProperty('--borderColor', visualStorageCopy.border.color);
+    /*
+     * Label Options
+     */
+    body.style.setProperty('--labelFontSize', visualStorageCopy.label.fontSize + "px");
+    body.style.setProperty('--labelOpacity', visualStorageCopy.label.opacity / 100);
+    body.style.setProperty('--labelTextTop', visualStorageCopy.label.textTop + "%");
+    body.style.setProperty('--labelTextAlign', visualStorageCopy.label.textAlign);
+    body.style.setProperty('--labelColor', visualStorageCopy.label.color);
+    //Label text is done dynamically
+}
+
+
+/*
+ * Return array of default option values, for when there are no options present in storage.
+ */
+function getDefaults() {
+    var storage = {};
+    //Grayscale
+    storage.grayscale = {
+        "active": true,
+        "factor": 0.5
+    };
+    //Color
+    storage.color = {
+        "active": false,
+        "color": "#000000",
+        "opacity": 0.5
+    };
+    //Border
+    storage.border = {
+        "active": false,
+        "color": "#ff0000",
+        "style": "solid",
+        "thickness": 10
+    };
+    //Label
+    storage.label = {
+        "active": false,
+        "text": "Adclipse Identified Ad",
+        "fontSize": 10,
+        "textAlign": "center",
+        "opacity": 0.5,
+        "paddingTop": 100,
+        "color": "#000000"
+    };
+    return storage;
+}
 
 
 /*

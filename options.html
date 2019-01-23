@@ -5,17 +5,165 @@
 <html>
 
 <head>
-  <!--Inline styling definitions instead of including a css file. -->
-  <style>
+  <title>Adclipse Options</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!--The below are for Code Mirror. -->
+  <script src="external/codeMirror/lib/codemirror.js"></script>
+  <link rel="stylesheet" href="external/codeMirror/lib/codemirror.css">
+  <!--The below are for the extension-->
+  <link href="options.css" rel="stylesheet">
+  <link href="content.css" rel="stylesheet">
 
-  </style>
 </head>
 
 <body>
-  <h3>Whitelist</h3>
-  <div id="whitelist">
+  <main>
 
-  </div>
+    <!--Tab Titles-->
+    <input id="tab1" type="radio" name="tabs" class="disable-select" checked>
+    <label for="tab1" class="disable-select">Visual</label>
+
+    <input id="tab2" type="radio" name="tabs" class="disable-select">
+    <label for="tab2" class="disable-select">Detection</label>
+
+    <input id="tab3" type="radio" name="tabs" class="disable-select">
+    <label for="tab3" class="disable-select">Whitelist</label>
+
+    <!--Visual Setting Tab Content-->
+    <section id="content1">
+      <div class="sectionContainer">
+        <div>
+          <div id="exampleAd">
+            <img src="images/sampleAd.png">
+          </div>
+        </div>
+        <h3>Highlighting Options</h3>
+        <div>
+
+          <!--GrayScale-->
+          <div class="section">
+
+            <label class="container">Grayscale
+              <input type="checkbox" name="grayscale">
+              <span class="checkmark"></span>
+            </label>
+
+            <div id="grayscaleOptions" class="options setting">
+              <div class="slideContainer">
+                Intensity: <input type="range" min="0" max="100" value="50" class="slider" id="grayscaleSlider">
+              </div>
+            </div>
+          </div>
+
+          <!--Color-->
+          <div class="section">
+
+            <label class="container">Color
+              <input type="checkbox" name="color">
+              <span class="checkmark"></span>
+            </label>
+
+            <div id="colorOptions" class="options">
+              <div class="colorContainer setting">
+                Color: <input type="color" name="color" value="#ff0000" id="colorColor">
+              </div>
+              <div class="slideContainer setting">
+                Opacity: <input type="range" min="0" max="100" value="50" class="slider" id="colorOpacity">
+              </div>
+            </div>
+          </div>
+
+          <!--Border-->
+          <div class="section">
+
+            <label class="container">Border
+              <input type="checkbox" name="border">
+              <span class="checkmark"></span>
+            </label>
+
+            <div id="colorOptions" class="options">
+              <div class="colorContainer setting">
+                Color: <input type="color" name="borderColor" value="#ff0000" id="borderColor">
+              </div>
+              <div class="selectContainer setting">
+                Style: <select id="borderStyle">
+                  <option value="solid">Solid</option>
+                  <option value="dotted">Dotted</option>
+                  <option value="dashed">Dashed</option>
+                  <option value="double">Double</option>
+                  <option value="groove">Groove</option>
+                  <option value="ridge">Ridge</option>
+                  <option value="inset">Inset</option>
+                  <option value="outset">Outset</option>
+                  <option value="hidden">Hidden</option>
+                </select>
+              </div>
+              <div class="slideContainer setting">
+                Thickness: <input type="range" min="0" max="100" value="10" class="slider" id="borderThickness">
+              </div>
+            </div>
+          </div>
+
+          <!--Label-->
+          <div class="section">
+
+            <label class="container">Label
+              <input type="checkbox" name="label">
+              <span class="checkmark"></span>
+            </label>
+
+            <div id="labelOptions" class="options">
+              <div class="slideContainer setting">
+                Label : <input type="text" value="Adclipse Identified Ad" id="labelText">
+              </div>
+              <div class="slideContainer setting">
+                <label>Font Size: </label><input type="range" min="0" max="100" value="12" class="slider" id="labelFontSize">
+              </div>
+              <div class="selectContainer setting">
+                Align: <select id="labelTextAlign">
+                  <option value="left">Left</option>
+                  <option value="center">Center</option>
+                  <option value="right">Right</option>
+                </select>
+              </div>
+              <div class="slideContainer setting">
+                Opacity: <input type="range" min="0" max="100" value="50" class="slider" id="labelOpacity">
+              </div>
+              <div class="slideContainer setting">
+                Position: <input type="range" min="0" max="100" value="40" class="slider" id="labelTextTop">
+              </div>
+              <div class="colorContainer setting">
+                Color: <input type="color" value="#ff0000" id="labelColor">
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!--Detection Setting Tab-->
+    <section id="content2">
+      <div class="sectionContainer">
+        <p> There's nothing here yet! </p>
+      </div>
+    </section>
+
+    <!--Whitelist Content Tab-->
+    <section id="content3">
+      <div class="sectionContainer">
+        <h3>Whitelist</h3>
+        <div class="whitelistButtons">
+          <button id="whitelistApply" class="button" disabled>Apply Changes</button>
+          <button id="whitelistCancel" class="button" disabled>Cancel</button>
+        </div>
+        <div class="codeBox">
+            <textarea name="whitelist" id="whitelist"></textarea>
+        </div>
+      </div>
+    </section>
+
+  </main>
 </body>
 <script src="options.js"></script>
 

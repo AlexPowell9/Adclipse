@@ -1,0 +1,313 @@
+/* 
+ * This is all to make the tabs pretty. 
+ *
+ *   https://codepen.io/oknoblich/pen/tfjFl
+ */
+
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600,700');
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100vh;
+}
+
+body {
+    display: flex;
+    align-items: left;
+    justify-content: left;
+    padding: 20px;
+    font: 14px/1.5 'Open Sans', sans-serif;
+    color: #345;
+    background: #f0f2f4;
+}
+
+p:not(:last-child) {
+    margin: 0 0 20px;
+}
+
+main {
+    width: 100%;
+    padding: 40px;
+    border: 1px solid rgba(0, 0, 0, .2);
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
+    overflow: hidden;
+}
+
+section {
+    display: none;
+    padding: 20px 0 0;
+    border-top: 1px solid #abc;
+}
+
+.sectionContainer {
+    margin-right: -40px;
+    height: 80vh;
+    width: 100%;
+    overflow: auto;
+}
+
+main>input {
+    display: none;
+}
+
+main>label {
+    display: inline-block;
+    margin: 0 0 -1px;
+    padding: 15px 25px;
+    font-weight: 600;
+    text-align: center;
+    color: #abc;
+    border: 1px solid transparent;
+}
+
+main>label:before {
+    font-family: fontawesome;
+    font-weight: normal;
+    margin-right: 10px;
+}
+
+main>label:hover {
+    color: #789;
+    cursor: pointer;
+}
+
+main>input:checked+label {
+    color: #0af;
+    border: 1px solid #abc;
+    border-top: 2px solid #0af;
+    border-bottom: 1px solid #fff;
+}
+
+#tab1:checked~#content1,
+#tab2:checked~#content2,
+#tab3:checked~#content3,
+#tab4:checked~#content4 {
+    display: block;
+}
+
+
+
+/* 
+ * Disable text selection.
+ *
+ * https://stackoverflow.com/questions/10809995/css-disable-text-selection/15273197
+ */
+.disable-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/*Sample Ad */
+#exampleAd {
+    clear: left;
+    float: right;
+}
+
+.options {
+    margin: 10px;
+}
+
+.section {
+    border: 1px solid rgba(0, 0, 0, .2);
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
+    max-width: 500px;
+    margin: 25px;
+    padding: 10px;
+}
+
+.CodeMirror {
+    border: 1px solid rgba(0, 0, 0, .2);
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
+    max-width: 800px;
+    margin: 25px;
+    padding: 0px;
+    height:50vh;
+
+}
+
+.whitelistButtons {
+    margin: 25px 25px 0 25px;
+}
+
+.slideContainer {
+    line-height: 12px;
+}
+
+.slideContainer>label {
+    vertical-align: middle;
+}
+
+.slideContainer>input {
+    vertical-align: middle;
+}
+
+.setting {
+    margin: 15px;
+}
+
+#whitelistApply {
+    background-color: #2196F3;
+    color: white;
+
+}
+
+#whitelistCancel{
+    background-color: #cccccc;
+    color: #666666;
+}
+
+button{
+    border: 1px solid #999999;
+    filter: brightness(0.95);
+    padding: 7px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:disabled,
+button[disabled] {
+    border: 1px solid #999999;
+    background-color: #cccccc !important;
+    color: #666666 !important;
+    filter:none;
+    cursor: default;
+}
+
+.button:hover {
+    filter: none;
+}
+
+
+/*
+* Nice checkboxes.
+* https://www.w3schools.com/howto/howto_css_custom_checkbox.asp
+*/
+
+/* Customize the label (the container) */
+.container {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 22px;
+    line-height: 22px;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Hide the browser's default checkbox */
+.container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+/* Create a custom checkbox */
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 25px;
+    width: 25px;
+    background-color: #eee;
+}
+
+/* On mouse-over, add a grey background color */
+.container:hover input~.checkmark {
+    background-color: #ccc;
+}
+
+/* When the checkbox is checked, add a blue background */
+.container input:checked~.checkmark {
+    background-color: #2196F3;
+
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+/* Show the checkmark when checked */
+.container input:checked~.checkmark:after {
+    display: block;
+}
+
+/* Style the checkmark/indicator */
+.container .checkmark:after {
+    left: 9px;
+    top: 5px;
+    width: 6px;
+    height: 12px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+@media screen and (max-width: 1000px) {
+    main>label {
+        font-size: 18px;
+    }
+
+    main>label:before {
+        margin: 0;
+        font-size: 18px;
+    }
+
+    .section {
+        max-width: 300px;
+    }
+
+}
+
+@media screen and (max-width: 800px) {
+
+    /*Sample Ad */
+    #exampleAd {
+        display: block;
+        width: calc(80% - 250px);
+        clear: both;
+        float: right;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    main>label {
+        padding: 10px;
+    }
+
+    .section {
+        max-width: 250px;
+    }
+
+    /*Sample Ad */
+    #exampleAd {
+        display: block;
+        width: calc(90% - 250px);
+        clear: both;
+        float: right;
+    }
+}
