@@ -626,7 +626,7 @@ function initializeOptions() {
         var divs = element.getElementsByClassName("adclipseLabel");
         //Update labels on all ads. No idea why foreach wont work here but I tried like 6 times.
         for (var i = 0; i < divs.length; i++) {
-            divs[0].textContent = adclipseLabel;
+            divs[0].innerHTML ='<div class="adclipseLabelText">' + adclipseLabel + '</div>';
         }
         //Set and Store changes
         visualStorageCopy.label.text = this.value;
