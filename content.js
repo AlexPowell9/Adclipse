@@ -84,7 +84,9 @@ let googleDataIdSelector = (containers) => {
     return document.querySelectorAll("[data-google-query-id]");
 }
 
-
+/*
+*   returns an array of all visible nodes on the screen
+*/
 let getVisibleContainers = (containers) => {
 	let vis  = [];
 	containers.forEach((container) => {
@@ -93,10 +95,27 @@ let getVisibleContainers = (containers) => {
 	return vis
 }
 
+/*
+*   returns true if a node is at an absolute pixel value on the screen,
+*   false otherwise
+*/
+let isAtPoint = (node) => {
+    //TODO
+    return true;
+}
+
+/*
+*   A module for iterating through the document tree
+*/
 let treeIterators = {
+    /*
+    *   returns the node with the least depth that is visble at a certain point on screen
+    *   if no point availible it will return null
+    */
     findMinimalDepthAtPoint: (document, point) => {
         return findMinDepthRecursive(document.body);
     },
+    //recursive helper function
     findMinDepthRecursive: (node, point) => {
         if(node.isAtPoint(point)){
             node.children.forEach((node) => {
@@ -107,11 +126,17 @@ let treeIterators = {
     }
 }
 
+/*
+*   returns true if an ad is visble
+*/
 let isVisible = (container) => {
     //TODO make this check if the container is visible
     return container.style && container.style.display!="none" && container.style.width && parseInt(container.style.width)>1;
 };
 
+/*
+*   Get all of the nodes inside of the document body
+*/
 let getAllContainers = () => {
 	let containers =[];
 	//TODO change this, ineffiecent
