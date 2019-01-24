@@ -99,7 +99,7 @@ let getVisibleContainers = (containers) => {
 *   returns true if a node is at an absolute pixel value on the screen,
 *   false otherwise
 */
-let isAtPoint = (node) => {
+let isAtPoint = (node, point) => {
     //TODO
     return true;
 }
@@ -112,17 +112,28 @@ let treeIterators = {
     *   returns the node with the least depth that is visble at a certain point on screen
     *   if no point availible it will return null
     */
-    findMinimalDepthAtPoint: (document, point) => {
-        return findMinDepthRecursive(document.body);
+    findMaxDepthAtPoint: (document, point) => {
+        return findMaxDepthRecursive(document.body);
     },
     //recursive helper function
-    findMinDepthRecursive: (node, point) => {
-        if(node.isAtPoint(point)){
+    findMaxDepthRecursive: (node, point, depth) => {
+        if(isAtPoint(node, point)){
+            returned = [];
             node.children.forEach((node) => {
-                if(node.isAtPoint(point))
+                if(isAtPoint(node, point))returned.push(findMaxDepthRecursive(node, point, depth+1))
             })
-            return MinDepthRecursive(nod)
-        }  
+            if(returned.length === 0)return {node: node, depth: depth};
+            else if(returned.length === 1)return returned[0];
+            else{
+                //makes use of the array reduce, basically just finds the node with the greatest depth and returns it
+                return returned.reduce((acc, currValue, currIndex, arr) => {
+                    if(currValue.depth > acc.depth)acc = currValue;
+                }, {depth:0});
+            }
+        }
+        else{
+            return node;
+        }
     }
 }
 
