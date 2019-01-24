@@ -119,7 +119,7 @@ let treeIterators = {
     findMaxDepthRecursive: (node, point, depth) => {
         if(isAtPoint(node, point)){
             returned = [];
-            node.children.forEach((node) => {
+            node.childNodes.forEach((node) => {
                 if(isAtPoint(node, point))returned.push(findMaxDepthRecursive(node, point, depth+1))
             })
             if(returned.length === 0)return {node: node, depth: depth};
