@@ -104,6 +104,27 @@ let isAtPoint = (node, point) => {
     return true;
 }
 
+let containerSelector = {
+    getAspectRatio: (node) => {
+        return this.getWidth(node)/this.getHeight(node);
+    }
+    findByAspectRatio: (tree, minRatio, maxRatio, iterationType) => {
+        let iter = treeIterators.getIterator(iterationType || treeIterators.DEPTHFIRST);
+        let returnNodes = [];
+        while(iter.hasNext()){
+            let curr = iter.next();
+            if(getAspectRatio(curr) >= minRatio && getAspectRatio(curr) <= maxRatio)returnNodes.push(curr);
+        }
+        return returnNodes;
+    }
+    getWidth: (node) => {
+        return node.style.width;
+    },
+    getHeight: (node) => {
+        return node.style.height;
+    }
+}
+
 /*
 *   A module for iterating through the document tree
 */
@@ -112,6 +133,11 @@ let treeIterators = {
     *   returns the node with the least depth that is visble at a certain point on screen
     *   if no point availible it will return null
     */
+    iterationMethods:{
+        DEPTHFIRST: (getNext) => {
+        }
+    }
+    DEFAULT_ITERATION = iterationMethods.DEPTHFIRST; 
     findMaxDepthAtPoint: (document, point) => {
         return findMaxDepthRecursive(document.body);
     },
@@ -132,7 +158,17 @@ let treeIterators = {
             }
         }
         else{
-            return node;
+            return null;
+        }
+    }
+    getIterator(tree, method){
+        if(!method)method = this.DEFAULT_ITERATION;
+        let iter = {
+            tree = tree,
+            currentNode: tree.root,
+            hasNext(){
+                return (method.getNext()!==null)
+            }
         }
     }
 }
