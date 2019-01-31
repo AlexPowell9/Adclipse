@@ -26,4 +26,25 @@ let selectRecursive(node, minRatio, maxRatio, selected) => {
     });
 }
 
+/**
+ * Selects the node with the most children
+*/
+let selectByChildren(node) => {
+    let returnNode = node
+    let children = node.childNodes.length;
+    node.childNodes.forEach((node) => {
+        let curr= selectByChildren(node);
+        if(curr.childNodes.length > children){
+            returnNode = curr;
+            children = curr.childNodes;
+        }
+    });
+    return returnNode;
+}
 
+let selectMaxChilren(node, list){
+    let children = node.childNodes.length;
+    node.childNodes.forEach((node) => {
+        if(node.childNodes.length > children) ;   
+    })
+}
