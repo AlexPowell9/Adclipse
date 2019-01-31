@@ -26,6 +26,12 @@
     <input id="tab2" type="radio" name="tabs" class="disable-select">
     <label for="tab2" class="disable-select">Detection</label>
 
+    <input id="tab4" type="radio" name="tabs" class="disable-select">
+    <label for="tab4" class="disable-select">Validate</label>
+
+    <input id="tab5" type="radio" name="tabs" class="disable-select">
+    <label for="tab5" class="disable-select">Train</label>
+
     <input id="tab3" type="radio" name="tabs" class="disable-select">
     <label for="tab3" class="disable-select">Whitelist</label>
 
@@ -158,13 +164,33 @@
           <button id="whitelistCancel" class="button" disabled>Cancel</button>
         </div>
         <div class="codeBox">
-            <textarea name="whitelist" id="whitelist"></textarea>
+          <textarea name="whitelist" id="whitelist"></textarea>
         </div>
       </div>
     </section>
 
+    <!--Validate Content Tab-->
+    <section id="content4">
+      <div class="sectionContainer">
+        <h3>Validate</h3>
+      </div>
+    </section>
+
+    <!--Train Content Tab-->
+    <section id="content5">
+      <div class="sectionContainer">
+        <h3>Train</h3>
+      </div>
+    </section>
+
+
   </main>
 </body>
 <script src="options.js"></script>
+<script src="options/visual.js"></script>
+<script src="options/detection.js"></script>
+<script src="options/whitelist.js"></script>
+<script src="options/validate.js"></script>
+<script src="options/train.js"></script>
 
 </html>
