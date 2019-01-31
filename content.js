@@ -84,7 +84,9 @@ let googleDataIdSelector = (containers) => {
     return document.querySelectorAll("[data-google-query-id]");
 }
 
-
+/*
+*   returns an array of all visible nodes on the screen
+*/
 let getVisibleContainers = (containers) => {
 	let vis  = [];
 	containers.forEach((container) => {
@@ -93,14 +95,99 @@ let getVisibleContainers = (containers) => {
 	return vis
 }
 
+/*
+*   returns true if a node is at an absolute pixel value on the screen,
+*   false otherwise
+*/
+let isAtPoint = (node, point) => {
+    //TODO
+    return true;
+}
+
+let containerSelector = {
+    getAspectRatio: (node) => {
+        return this.getWidth(node)/this.getHeight(node);
+    }
+    findByAspectRatio: (tree, minRatio, maxRatio, iterationType) => {
+        let iter = treeIterators.getIterator(iterationType || treeIterators.DEPTHFIRST);
+        let returnNodes = [];
+        while(iter.hasNext()){
+            let curr = iter.next();
+            if(getAspectRatio(curr) >= minRatio && getAspectRatio(curr) <= maxRatio)returnNodes.push(curr);
+        }
+        return returnNodes;
+    }
+    getWidth: (node) => {
+        return node.style.width;
+    },
+    getHeight: (node) => {
+        return node.style.height;
+    }
+}
+
+/*
+*   A module for iterating through the document tree
+*/
+let treeIterators = {
+    /*
+    *   returns the node with the least depth that is visble at a certain point on screen
+    *   if no point availible it will return null
+    */
+    iterationMethods:{
+        DEPTHFIRST: (getNext) => {
+        }
+    }
+    DEFAULT_ITERATION = iterationMethods.DEPTHFIRST; 
+    findMaxDepthAtPoint: (document, point) => {
+        return findMaxDepthRecursive(document.body);
+    },
+    //recursive helper function
+    findMaxDepthRecursive: (node, point, depth) => {
+        if(isAtPoint(node, point)){
+            returned = [];
+            node.childNodes.forEach((node) => {
+                if(isAtPoint(node, point))returned.push(findMaxDepthRecursive(node, point, depth+1))
+            })
+            if(returned.length === 0)return {node: node, depth: depth};
+            else if(returned.length === 1)return returned[0];
+            else{
+                //makes use of the array reduce, basically just finds the node with the greatest depth and returns it
+                return returned.reduce((acc, currValue, currIndex, arr) => {
+                    if(currValue.depth > acc.depth)acc = currValue;
+                }, {depth:0});
+            }
+        }
+        else{
+            return null;
+        }
+    }
+    getIterator(tree, method){
+        if(!method)method = this.DEFAULT_ITERATION;
+        let iter = {
+            tree = tree,
+            currentNode: tree.root,
+            hasNext(){
+                return (method.getNext()!==null)
+            }
+        }
+    }
+}
+
+/*
+*   returns true if an ad is visble
+*/
 let isVisible = (container) => {
     //TODO make this check if the container is visible
     return container.style && container.style.display!="none";
 };
 
+/*
+*   Get all of the nodes inside of the document body
+*/
 let getAllContainers = () => {
 	let containers =[];
-	containers = document.body.getElementsByTagName("*");
+	//TODO change this, ineffiecent
+    containers = document.body.getElementsByTagName("*");
 	return object.values(containers);
 }
 
