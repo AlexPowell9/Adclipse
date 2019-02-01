@@ -1,5 +1,5 @@
 /*
-* This file keeps all of the option javascript for the visual tab. 
+* SUMMARY: This file keeps all of the option javascript for the visual tab. 
 */
 
 

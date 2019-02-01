@@ -1,3 +1,3 @@
 /*
-* This file keeps all of the option javascript for the train tab. 
+* SUMMARY: This file keeps all of the option javascript for the train tab. 
 */

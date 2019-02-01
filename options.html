@@ -10,9 +10,12 @@
   <!--The below are for Code Mirror. -->
   <script src="external/codeMirror/lib/codemirror.js"></script>
   <link rel="stylesheet" href="external/codeMirror/lib/codemirror.css">
+  <!--The below are for ml5.js -->
+  <script src="external/ml5/ml5@0.2.1.min.js"></script>
   <!--The below are for the extension-->
   <link href="options.css" rel="stylesheet">
   <link href="content.css" rel="stylesheet">
+
 
 </head>
 
@@ -173,6 +176,15 @@
     <section id="content4">
       <div class="sectionContainer">
         <h3>Validate</h3>
+        <div class="section">
+          <strong>Status: </strong><span id='vStatus'>Loading Model...</span>
+          <input type="file" name="pic" accept="image/*" id="fileUploader">
+          <img crossOrigin id="uploadedImage" width="224" height="224">
+          <button id="predictButton">Predict</button>
+          <p>
+            <strong>Result: </strong><span id='vResult'>Waiting...</span>
+          </p>
+        </div>
       </div>
     </section>
 
