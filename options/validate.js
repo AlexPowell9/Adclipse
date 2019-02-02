@@ -18,6 +18,7 @@ const result = document.getElementById('vResult');
  */
 let features;
 let classifier;
+//let regressor
 
 
 
@@ -45,6 +46,7 @@ function initialize() {
         //features.numClasses=3;
         updateStatus("Loading Classifier...");
         classifier = features.classification();
+        //regressor = features.regression();
         loadModel();
     });
 }
@@ -101,12 +103,14 @@ function predictButtonDisabled(disabled) {
  */
 function predictImages() {
     var t0 = performance.now();
+    //regressor.predict(uploadedImage, function (err, results) {
     classifier.classify(uploadedImage, function (err, results) {
         if (err) {
             result.innerHTML = err;
         } else {
+            console.log(results);
             var t1 = performance.now();
-            result.innerHTML = results + " in " + (t1-t0).toFixed(2) + " ms.";
+            result.innerHTML = results + " in " + (t1 - t0).toFixed(2) + " ms.";
         }
     });
 }
