@@ -28,16 +28,17 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
         whitelisted = true;
     }
     //getAdsBlocked();
-    let counter = 2;
-    setTimeout(() => {
-        highlightAds();
-    }, 3000);
-    setInterval(function() {
-       if(counter > 0) highlightAds();
-       counter--;
-       setBadge();
-       setIcon();
-    }, 5000);
+    // let counter = 2;
+    // setTimeout(() => {
+    //     highlightAds();
+    // }, 3000);
+    highlightAds();
+    // setInterval(function() {
+    //    if(counter > 0) highlightAds();
+    //    counter--;
+    //    setBadge();
+    //    setIcon();
+    // }, 5000);
 });
 
 
@@ -70,8 +71,15 @@ function highlightAds() {
         // adsBlocked++;
         console.log(container);
         if(container !== null && container !== undefined && container !== "") {
+            options = {
+                logging: true,
+                ignoreElements: function(element) {
+                    return element.tagName.toLowerCase() == 'iframe' || element.tagName.toLowerCase() == 'img';
+                    // return element.tagName.toLowerCase() == 'iframe';
+                }
+            };
             try {
-                html2canvas(container).then((canvas) => {
+                html2canvas(container, options).then((canvas) => {
                     let ctx = canvas.getContext('2d');
                     var expanded = ctx.getImageData(0,0, canvas.width, canvas.height);
                     Tesseract.recognize(expanded).then(function(result) {
@@ -126,8 +134,16 @@ function offset(element) {
  */
 function selectContainers() {
     // return document.querySelectorAll("[data-google-query-id]");
+
+    // reddit posts
     // return document.querySelectorAll("._1poyrkZ7g36PawDueRza-J > article");
-    return document.querySelectorAll(".ii4q9d-0");
+
+    // reddit sidebar ads
+    // return document.querySelectorAll(".ii4q9d-0");
+
+    // posts and sidebar 
+    // return document.querySelectorAll("._1poyrkZ7g36PawDueRza-J, .ii4q9d-0");
+    return document.querySelectorAll(".rpBJOHq2PR60pnwJlUyP0 > div, .ii4q9d-0");
 }
 
 /*
