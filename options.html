@@ -177,8 +177,8 @@
       <div class="sectionContainer">
         <h3>Validate</h3>
         <div class="section">
-          <strong>Status: </strong><span id='vStatus'>Loading Model...</span>
-          <input type="file" name="pic" accept="image/*" id="fileUploader">
+          <strong>Status: </strong><span id='vStatus'>Loading...</span>
+          <input type="file" name="pic" accept="image/*" id="vFileUploader">
           <img crossOrigin id="uploadedImage" width="224" height="224">
           <button id="predictButton">Predict</button>
           <p>
@@ -192,6 +192,18 @@
     <section id="content5">
       <div class="sectionContainer">
         <h3>Train</h3>
+        <div class="section">
+          <strong>Status: </strong><span id='tStatus'>Loading...</span>
+          <label for="files">Select multiple files: </label>
+          <input id="tFileUploader" type="file" accept="image/*" multiple />
+          <output id="tFileResults"></output>
+          <input type="text" id="tPictureLabel"/>
+          <button id="trainButton">Train</button>
+          <button id="saveButton">Save</button>
+          <p>
+            <strong>Result: </strong><span id='tResult'>Waiting...</span>
+          </p>
+        </div>
       </div>
     </section>
 

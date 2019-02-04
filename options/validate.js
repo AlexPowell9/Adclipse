@@ -7,14 +7,14 @@
 /*
  * Get all the elements we'll need for later.
  */
-const status = document.getElementById('vStatus');
-const fileUploader = document.getElementById('fileUploader');
+const vStatus = document.getElementById('vStatus');
+const vFileUploader = document.getElementById('vFileUploader');
 const uploadedImage = document.getElementById('uploadedImage');
 const predictButton = document.getElementById('predictButton');
-const result = document.getElementById('vResult');
+const vResult = document.getElementById('vResult');
 
 /*
- * ml5.js global definitions. These are initialized in initialize().
+ * ml5.js global definitions. These are initialized in vInitialize().
  */
 let features;
 let classifier;
@@ -25,7 +25,7 @@ let classifier;
 
 //We need to do this to get the updated model.
 document.getElementById("tab4").addEventListener("click", function () {
-    initialize();
+    vInitialize();
 });
 
 
@@ -35,55 +35,55 @@ document.getElementById("tab4").addEventListener("click", function () {
  * How to time a JS function: https://stackoverflow.com/questions/313893/how-to-measure-time-taken-by-a-function-to-execute
  * How to load models using ml5 >=0.1.3: https://codepen.io/kotobuki/pen/yRzGZL?editors=0011
  */
-
-function initialize() {
-    updateStatus("Loading Feature Extractor...");
+function vInitialize() {
+    vUpdateStatus("Loading Feature Extractor...");
     features = ml5.featureExtractor('MobileNet', () => {
         /*
          * This is a weird thing that may or may not have been fixed in new version. With more than 2 classes it was refusing to pick up more classes.
          * https://github.com/ml5js/ml5-library/issues/164
          */
         //features.numClasses=3;
-        updateStatus("Loading Classifier...");
+        vUpdateStatus("Loading Classifier...");
         classifier = features.classification();
         //regressor = features.regression();
-        loadModel();
+        vLoadModel();
     });
 }
 //Load Model
-function loadModel() {
-    updateStatus("Loading Model...");
+function vLoadModel() {
+    vUpdateStatus("Loading Model...");
     var t0 = performance.now();
     classifier.load("./external/ml5/model.json", () => {
         var t1 = performance.now();
-        updateStatus("Model Loaded in " + (t1 - t0).toFixed(2) + " ms.");
+        vUpdateStatus("Model Loaded in " + (t1 - t0).toFixed(2) + " ms.");
     });
 }
 
 /*
  * Function that displays that feature extractor is ready.
  */
-function featureExtractorReady() {
-    updateStatus("Feature Extractor Ready.");
+function vFeatureExtractorReady() {
+    vUpdateStatus("Feature Extractor Ready.");
 }
 
 /*
  * Handles updating the status variable, this is abstracted so that we can change the status variable painlessly.
  */
-function updateStatus(updateString) {
-    status.innerHTML = updateString;
+function vUpdateStatus(updateString) {
+    vStatus.innerHTML = updateString;
 }
 
 /* 
  * Reads the first file in file uploader. 
  */
-fileUploader.oninput = function () {
-    if (fileUploader.files && fileUploader.files[0]) {
+vFileUploader.oninput = function () {
+    if (vFileUploader.files && vFileUploader.files[0]) {
         var reader = new FileReader();
         reader.onload = function (e) {
             uploadedImage.src = e.target.result;
+            console.log(uploadedImage);
         }
-        reader.readAsDataURL(fileUploader.files[0]);
+        reader.readAsDataURL(vFileUploader.files[0]);
     }
 };
 
@@ -91,26 +91,31 @@ fileUploader.oninput = function () {
  * Predict button event.
  */
 predictButton.addEventListener("click", function () {
-    predictImages();
+    vPredictImages();
 });
 
-function predictButtonDisabled(disabled) {
+function vPredictButtonDisabled(disabled) {
     predictButton.disabled = disabled;
 }
 
 /*
  * Predict image(s).
  */
-function predictImages() {
+function vPredictImages() {
+    if(!uploadedImage.src){
+        vResult.innerHTML = "Error: No Image Uploaded!";
+        return;
+    }
+    console.log(uploadedImage);
     var t0 = performance.now();
     //regressor.predict(uploadedImage, function (err, results) {
     classifier.classify(uploadedImage, function (err, results) {
         if (err) {
-            result.innerHTML = err;
+            vResult.innerHTML = err;
         } else {
             console.log(results);
             var t1 = performance.now();
-            result.innerHTML = results + " in " + (t1 - t0).toFixed(2) + " ms.";
+            vResult.innerHTML = results + " in " + (t1 - t0).toFixed(2) + " ms.";
         }
     });
 }
