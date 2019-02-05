@@ -202,21 +202,51 @@ button[disabled] {
     filter: none;
 }
 
-.text-center{
+.text-center {
     text-align: center;
-    margin-left:0 !important;
-    margin-right:0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
 }
 
-.toggle{
-    margin-bottom:10px;
+.toggle {
+    margin-bottom: 10px;
 }
 
-.labelList{
+.labelList {
     list-style-type: none;
 }
-.labelList li{
-    margin-left:25px;
+
+.labelList li {
+    margin-left: 25px;
+}
+
+#tFileResults {
+    width: 490px;
+    height: 490px;
+    padding: 10px;
+    border: 1px solid rgba(0, 0, 0, .2);
+    overflow: auto;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#tFileResults div {
+    display: inline-block;
+}
+
+.breathingRoom {
+    margin-bottom: 5px;
+    margin-top: 5px;
+}
+
+.breathingRoomL {
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+.IRButton {
+    background-color: #2196F3;
+    color: white;
 }
 
 /*

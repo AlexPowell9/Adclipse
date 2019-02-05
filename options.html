@@ -187,27 +187,40 @@
         <!--Validating-->
         <h3>Validate</h3>
         <div class="IRSection">
-          <p>
-            <input type="file" name="pic" accept="image/*" id="vFileUploader">
+          <div class="text-center">
+            <div class="breathingRoom">
+                <label>Select Single Image File: </label><input type="file" accept="image/*" id="vFileUploader">
+            </div>
             <img crossOrigin id="uploadedImage" width="224" height="224">
-          </p>
-          <button id="predictButton">Predict</button>
-          <p>
+          </div>
+          <div class="breathingRoomL">
+            <button class="IRButton" id="predictButton">Predict</button>
+          </div>
+          <div>
             <strong>Result: </strong><span id='vResult'>Waiting...</span>
-          </p>
+          </div>
         </div>
         <!--Training-->
         <h3>Train</h3>
         <div class="IRSection">
-          <label for="files">Select multiple files: </label>
-          <input id="tFileUploader" type="file" accept="image/*" multiple />
-          <output id="tFileResults"></output>
-          <input type="text" id="tPictureLabel" value="advertisement" />
-          <button id="trainButton">Train</button>
-          <button id="saveButton">Save</button>
-          <p>
+          <div class="text-center">
+            <div class="breathingRoom">
+              <label for="tFileUploader">Select Multiple Files: </label>
+              <input id="tFileUploader" type="file" accept="image/*" multiple />
+            </div>
+            <div id="tFileResults"></div>
+            <div class="breathingRoom">
+              <label for="tPictureLabel">Label Image Set: </label>
+              <input type="text" id="tPictureLabel" value="advertisement" />
+            </div>
+          </div>
+          <div class="breathingRoomL">
+            <button class="IRButton" id="trainButton">Train</button>
+            <button class="IRButton" id="saveButton">Save</button>
+          </div>
+          <div>
             <strong>Result: </strong><span id='tResult'>Waiting...</span>
-          </p>
+          </div>
         </div>
       </div>
     </section>
