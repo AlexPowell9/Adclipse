@@ -15,7 +15,7 @@
     "content_scripts": [{
         "matches": ["http://*/*",
             "https://*/*"],
-        "js": ["content.js", "html2canvas.min.js", "tesseract.min.js"],
+        "js": ["content.js", "ocr.js", "html2canvas.min.js", "tesseract.min.js"],
         "css": ["content.css"],
         "run_at": "document_end",
         "all_frames": false,
