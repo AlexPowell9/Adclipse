@@ -57,7 +57,7 @@ function modelInitialize() {
          * This is a weird thing that may or may not have been fixed in new version. With more than 2 classes it was refusing to pick up more classes.
          * https://github.com/ml5js/ml5-library/issues/164
          */
-        //features.numClasses=3;
+        features.numClasses=20;
 
         //Default to loading custom model.
         loadModel();
@@ -102,6 +102,7 @@ function newModel() {
     }
     modelUpdateStatus("Loading Feature Extractor...");
     features = ml5.featureExtractor('MobileNet', () => {
+        features.numClasses=20;
         modelUpdateStatus("Loading Classifier...");
         classifier = features.classification();
         //regressor = features.regression();
