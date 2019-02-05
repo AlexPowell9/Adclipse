@@ -67,7 +67,7 @@ function tUpdateStatus(updateString) {
 }
 
 /* 
- * Reads the first file in file uploader. 
+ * Reads the all the files in file uploader. 
  *
  * http://jsfiddle.net/n98rqhaL/
  */

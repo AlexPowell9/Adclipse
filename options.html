@@ -30,10 +30,7 @@
     <label for="tab2" class="disable-select">Detection</label>
 
     <input id="tab4" type="radio" name="tabs" class="disable-select">
-    <label for="tab4" class="disable-select">Validate</label>
-
-    <input id="tab5" type="radio" name="tabs" class="disable-select">
-    <label for="tab5" class="disable-select">Train</label>
+    <label for="tab4" class="disable-select">Image Recognition</label>
 
     <input id="tab3" type="radio" name="tabs" class="disable-select">
     <label for="tab3" class="disable-select">Whitelist</label>
@@ -172,32 +169,40 @@
       </div>
     </section>
 
-    <!--Validate Content Tab-->
+    <!--ml5 Content Tab-->
     <section id="content4">
       <div class="sectionContainer">
+        <!--Model-->
+        <h3>Model</h3>
+        <div class="IRSection">
+          <div class="toggle text-center disable-select" id="modelToggle">
+            <div class="toggle-label toggle-label-off">Adclipse Model</div>
+            <div class="toggle-switch"></div>
+            <div class="toggle-label toggle-label-on">Clean Model</div>
+          </div>
+          <strong>Status: </strong><span id='modelStatus'>Loading...</span>
+          <h4>Labels:</h4>
+          <ul class="labelList" id="modelLabels"></ul>
+        </div>
+        <!--Validating-->
         <h3>Validate</h3>
-        <div class="section">
-          <strong>Status: </strong><span id='vStatus'>Loading...</span>
-          <input type="file" name="pic" accept="image/*" id="vFileUploader">
-          <img crossOrigin id="uploadedImage" width="224" height="224">
+        <div class="IRSection">
+          <p>
+            <input type="file" name="pic" accept="image/*" id="vFileUploader">
+            <img crossOrigin id="uploadedImage" width="224" height="224">
+          </p>
           <button id="predictButton">Predict</button>
           <p>
             <strong>Result: </strong><span id='vResult'>Waiting...</span>
           </p>
         </div>
-      </div>
-    </section>
-
-    <!--Train Content Tab-->
-    <section id="content5">
-      <div class="sectionContainer">
+        <!--Training-->
         <h3>Train</h3>
-        <div class="section">
-          <strong>Status: </strong><span id='tStatus'>Loading...</span>
+        <div class="IRSection">
           <label for="files">Select multiple files: </label>
           <input id="tFileUploader" type="file" accept="image/*" multiple />
           <output id="tFileResults"></output>
-          <input type="text" id="tPictureLabel"/>
+          <input type="text" id="tPictureLabel" value="advertisement" />
           <button id="trainButton">Train</button>
           <button id="saveButton">Save</button>
           <p>
@@ -214,7 +219,6 @@
 <script src="options/visual.js"></script>
 <script src="options/detection.js"></script>
 <script src="options/whitelist.js"></script>
-<script src="options/validate.js"></script>
-<script src="options/train.js"></script>
+<script src="options/imageRecongition.js"></script>
 
 </html>
