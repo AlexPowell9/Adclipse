@@ -54,7 +54,7 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
         setBadge();
         setIcon();
     } else {
-        highlightAds('ocr');
+        evaluateContainers('ocr');
     }
 
 });
@@ -76,22 +76,22 @@ function getAdsBlocked() {
 }
 
 /*
- * Highlight Potential Ads
- * Gives containers to the selected detection module
+ * Evaluate Containers
+ * Gives containers to the selected detection module to decide if they are ads
  */
 
-// function highlightAds(method) {
-//     let containers = selectContainers();
-//     if(method === 'ocr') {
-//         OCR.process(containers);
-//     }
-// }
+function evaluateContainers(method) {
+    let containers = selectContainers();
+    if(method === 'ocr') {
+        OCR.process(containers);
+    }
+}
 
-function highlightAds() {
+function highlightAds(container) {
     adsBlocked = 0;
-    selectContainers().forEach(container => {
+    //containers.forEach(container => {
         // container.style.border = "10px solid red";
-        if (isAd(container)) {
+        //if (isAd(container)) {
             if (visualStorageCopy.grayscale.active) {
                 if (!container.classList["adclipseGrayscale"]) {
                     container.classList.add("adclipseGrayscale");
@@ -139,8 +139,8 @@ function highlightAds() {
             }
 
             adsBlocked++;
-        }
-    });
+        //}
+    //});
     console.log('Ads blocked: ' + adsBlocked);
 }
 

@@ -19,7 +19,7 @@ OCR.process = function(containers) {
                 html2canvas(container, options).then((canvas) => {
                     let ctx = canvas.getContext('2d');
                     var expanded = ctx.getImageData(0,0, canvas.width, canvas.height);
-                    
+
                     Tesseract.recognize(expanded).then(function(result) {
                         console.log("TESSERACT RECOGNIZED:", result);
                         if(result.text.includes("PROMOTED") 
@@ -28,22 +28,25 @@ OCR.process = function(containers) {
                             || result.text.includes("ADVERTISEMENT")
                             || result.text.includes("Anvzmsmm")
                             ) {
-                            container.classList.add("adclipse-ad");
-                            foundAd();
+                            // container.classList.add("adclipse-ad");
+                            foundAd(container);
                         }
                     });
-                });
+                });               
+
             } catch(e) {
                 console.log('something went wrong');
             }
         }
     });
+
 }
 
 
-function foundAd() {
+function foundAd(container) {
     adsFound++;
     console.log('adsfound', adsFound);
+    highlightAds(container);
     if (adsFound > 0) {
         chrome.runtime.sendMessage({
             badgeText: "" + adsFound
