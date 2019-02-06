@@ -2,11 +2,11 @@
  * OCR module
  */
 
- let OCR = {};
- var adsFound = 0;
+let OCR = {};
+var adsFound = 0;
 
- OCR.process = function(containers) {
-     containers.forEach(container => {
+OCR.process = function(containers) {
+    containers.forEach(container => {
         if(container !== null && container !== undefined && container !== "") {
             options = {
                 logging: false,
@@ -37,13 +37,14 @@
                 console.log('something went wrong');
             }
         }
-     });
- }
+    });
+}
 
- function foundAd() {
-     adsFound++;
-     console.log('adsfound', adsFound);
-     if (adsFound > 0) {
+
+function foundAd() {
+    adsFound++;
+    console.log('adsfound', adsFound);
+    if (adsFound > 0) {
         chrome.runtime.sendMessage({
             badgeText: "" + adsFound
         });
@@ -52,5 +53,5 @@
             badgeText: ""
         });
     }
- }
+}
 

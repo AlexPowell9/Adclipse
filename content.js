@@ -22,13 +22,16 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
     }
     var d = extractRootDomain(currentTab);
     // console.log(d);
-    //Whitelisted.
+
+    // Check if whitelisted
     if (storageCopy.indexOf(d) != -1) {
+        // whitelisted
         whitelisted = true;
     }
-    //getAdsBlocked();
-
-    highlightAds('ocr');
+    else {
+        // not whitelisted
+        highlightAds('ocr');
+    }
 
 });
 
@@ -50,8 +53,7 @@ function getAdsBlocked() {
 
 /*
  * Highlight Potential Ads
- * Processes containers based on the selected detection method
- * TODO: everthing
+ * Gives containers to the selected detection module
  */
 
 function highlightAds(method) {
