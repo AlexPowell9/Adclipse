@@ -59,89 +59,81 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
 
 });
 
-
-/*
- * We set the badge here using the adsBlocked number, which is currently random.
- */
 var adsBlocked;
 
-function getAdsBlocked() {
-    if (whitelisted) {
-        adsBlocked = 0;
-    } else {
-        adsBlocked = randomIntFromInterval(0, 300);
-    }
+/*
+ * We set the badge here using the adsBlocked number
+ */
+function updateBadge() {
     setBadge();
     setIcon();
+    console.log("Ads on this page:", adsBlocked);
 }
 
 /*
  * Evaluate Containers
  * Gives containers to the selected detection module to decide if they are ads
+ * Puts the returned ad containers through the hightlighting function
  */
 
-function evaluateContainers(method) {
+async function evaluateContainers(method) {
     let containers = selectContainers();
     if(method === 'ocr') {
-        OCR.process(containers);
+        let ads = await OCR.process(containers);
+        highlightAds(ads);
+        adsBlocked = ads.length;
+        updateBadge();
     }
 }
 
-function highlightAds(container) {
-    adsBlocked = 0;
-    //containers.forEach(container => {
-        // container.style.border = "10px solid red";
-        //if (isAd(container)) {
-            if (visualStorageCopy.grayscale.active) {
-                if (!container.classList["adclipseGrayscale"]) {
-                    container.classList.add("adclipseGrayscale");
-                }
+function highlightAds(containers) {
+    containers.forEach(container => {
+        if (visualStorageCopy.grayscale.active) {
+            if (!container.classList["adclipseGrayscale"]) {
+                container.classList.add("adclipseGrayscale");
             }
-            if (visualStorageCopy.color.active) {
-                //This is ugly. We first remove all the color containers, and then add new ones.
-                var divs = container.getElementsByClassName("adclipseColor");
-                //No idea why foreach wont work here but I tried like 6 times.
-                for (var i = 0; i < divs.length; i++) {
-                    divs[0].remove();
-                }
-                //Add new ones. This is needed because it has to be a child for the css rules to work.
-                var newDiv = document.createElement("div");
-                newDiv.classList.add("adclipseColor");
-                container.appendChild(newDiv);
-                if (!container.classList["adclipseRelative"]) {
-                    container.classList.add("adclipseRelative");
-                }
+        }
+        if (visualStorageCopy.color.active) {
+            //This is ugly. We first remove all the color containers, and then add new ones.
+            var divs = container.getElementsByClassName("adclipseColor");
+            //No idea why foreach wont work here but I tried like 6 times.
+            for (var i = 0; i < divs.length; i++) {
+                divs[0].remove();
             }
-            if (visualStorageCopy.border.active) {
-                if (!container.classList["adclipseBorder"]) {
-                    container.classList.add("adclipseBorder");
-                }
-            }
-            if (visualStorageCopy.label.active) {
-                //This is ugly. We first remove all the color containers, and then add new ones.
-                var divs = container.getElementsByClassName("adclipseLabel");
-                //No idea why foreach wont work here but I tried like 6 times.
-                for (var i = 0; i < divs.length; i++) {
-                    divs[0].remove();
-                }
-                //Add two new divs, one for the container, and one for the text.
-                var newDiv = document.createElement("div");
-                var textDiv = document.createElement("div");
-                textDiv.textContent = adclipseLabel;
-                textDiv.classList.add("adclipseLabelText");
-                newDiv.classList.add("adclipseLabel");
-                newDiv.appendChild(textDiv);
-                container.appendChild(newDiv);
+            //Add new ones. This is needed because it has to be a child for the css rules to work.
+            var newDiv = document.createElement("div");
+            newDiv.classList.add("adclipseColor");
+            container.appendChild(newDiv);
+            if (!container.classList["adclipseRelative"]) {
                 container.classList.add("adclipseRelative");
-                if (!container.classList["adclipseRelative"]) {
-                    container.classList.add("adclipseRelative");
-                }
             }
-
-            adsBlocked++;
-        //}
-    //});
-    console.log('Ads blocked: ' + adsBlocked);
+        }
+        if (visualStorageCopy.border.active) {
+            if (!container.classList["adclipseBorder"]) {
+                container.classList.add("adclipseBorder");
+            }
+        }
+        if (visualStorageCopy.label.active) {
+            //This is ugly. We first remove all the color containers, and then add new ones.
+            var divs = container.getElementsByClassName("adclipseLabel");
+            //No idea why foreach wont work here but I tried like 6 times.
+            for (var i = 0; i < divs.length; i++) {
+                divs[0].remove();
+            }
+            //Add two new divs, one for the container, and one for the text.
+            var newDiv = document.createElement("div");
+            var textDiv = document.createElement("div");
+            textDiv.textContent = adclipseLabel;
+            textDiv.classList.add("adclipseLabelText");
+            newDiv.classList.add("adclipseLabel");
+            newDiv.appendChild(textDiv);
+            container.appendChild(newDiv);
+            container.classList.add("adclipseRelative");
+            if (!container.classList["adclipseRelative"]) {
+                container.classList.add("adclipseRelative");
+            }
+        }
+    });
 }
 
 /*
