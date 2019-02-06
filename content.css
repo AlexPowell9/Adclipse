@@ -1,3 +1,18 @@
+/* Define css variables. */
+:root {
+    --grayscaleFactor: 0.5;
+    --colorColor: black;
+    --colorOpacity: 0.5;
+    --borderThickness: 10px;
+    --borderStyle: solid;
+    --borderColor: red;
+    --labelOpacity: 1;
+    --labelTextAlign: center;
+    --labelTextTop: 40%;
+    --labelFontSize: 12px;
+    --labelColor: black;
+}
+
 .adclipse-ad {
     border: 10px solid red;
     content: "Ad identified by Adclipse";
@@ -9,7 +24,71 @@
 }
 
 .adclipse-ad * {
-    -webkit-filter: grayscale(100%); /* Safari 6.0 - 9.0 */
+    -webkit-filter: grayscale(100%);
+    /* Safari 6.0 - 9.0 */
     filter: grayscale(100%);
 }
 
+/*
+* Grayscale. Use unique names to not mess up any of the pages content. 
+* If publishers try to circumvent this by using these classes in the regular page we
+* can move to dynamically generated class names.
+*/
+.adclipseGrayscale * {
+    filter: grayscale(var(--grayscaleFactor));
+    overflow:hidden;
+}
+
+/* Border. */
+.adclipseBorder {
+    border: var(--borderThickness) var(--borderStyle) var(--borderColor);
+    overflow:hidden;
+}
+
+/* Color. */
+.adclipseColor {
+    position: absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    height:100%;
+    width:100%;
+    z-index: 1000;
+    background: var(--colorColor);
+    opacity: var(--colorOpacity);
+    filter:none;
+    overflow:hidden;
+}
+
+/* Label. */
+.adclipseLabel{
+    font-size: var(--labelFontSize);
+    opacity: var(--labelOpacity);
+    text-align: var(--labelTextAlign);
+    color: var(--labelColor);
+    font-weight: 900;
+    position: absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    height:100%;
+    width:100%;
+    z-index: 1002;
+    filter:none;
+    overflow:auto;
+}
+
+.adclipseLabelText{
+    filter:none;
+    position: relative;
+    top:var(--labelTextTop);
+    line-height: var(--labelFontSize);
+
+}
+
+/* This has to go on anything with color or label to make them work. */
+.adclipseRelative {
+    position: relative;
+}
