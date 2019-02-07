@@ -22,7 +22,7 @@ let selectRecursive(node, minRatio, maxRatio, selected) => {
             nRatio = getWidth(node)/getHeight(node);
             if(nRatio <= maxRatio && nRatio >= minRatio)selected.push(node);
         }
-        selectRecursive(node, minRatio, maxRatio, selected)
+        selectRecursive(node, minRatio, maxRatio, selected);
     });
 }
 
@@ -42,9 +42,43 @@ let selectByChildren(node) => {
     return returnNode;
 }
 
+let getCandidateContainers =(method) => {
+       
+}
+
+let selectAllByChildren = (node, depth, sorted) => {
+    if(!depth)depth = 1;
+    let selected = [];
+    node.childNodes.forEach((node, index) => {
+        selected.push({
+            node: node,
+            count: countChildren(node, depth);
+        });
+    });
+    if(sorted){
+        selected.sort((a,b) => {
+            return a.count-b.count;     
+        });
+    }
+    return selected;
+}
+
+let countChildren = (node, depth) => {
+    let numChild = 0;
+    countChildrenRec(node, 0, depth);
+}
+
+let countChildrenRec = (node, depth, maxDepth) => {
+    if(depth == maxDepth)return 1;
+    let count = 1;
+    node.childNodes.forEach((node, index) => {
+        count += countChildRec(node, depth++, maxDepth);
+    });
+    return count;
+}
 let selectMaxChilren(node, list){
     let children = node.childNodes.length;
     node.childNodes.forEach((node) => {
         if(node.childNodes.length > children) ;   
-    })
+    });
 }
