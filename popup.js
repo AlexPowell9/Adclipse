@@ -137,7 +137,7 @@ function updateWhitelist(domain, add) {
   //Add or remove
   if (add) {
     //Check if entry already exists
-    if (storageCopy.indexOf(domain) === -1) {
+    if (storageCopy.indexOf(domain) == -1) {
       storageCopy.push(domain);
     }
   } else {

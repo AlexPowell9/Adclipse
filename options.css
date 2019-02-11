@@ -44,7 +44,7 @@ main {
 
 section {
     display: none;
-    padding: 20px 0 0;
+    padding: 20px 0 20px 0;
     border-top: 1px solid #abc;
 }
 
@@ -127,6 +127,15 @@ main>input:checked+label {
     padding: 10px;
 }
 
+.IRSection {
+    border: 1px solid rgba(0, 0, 0, .2);
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
+    max-width: 800px;
+    margin: 25px;
+    padding: 10px;
+}
+
 .CodeMirror {
     border: 1px solid rgba(0, 0, 0, .2);
     background: #fff;
@@ -134,7 +143,7 @@ main>input:checked+label {
     max-width: 800px;
     margin: 25px;
     padding: 0px;
-    height:50vh;
+    height: 50vh;
 
 }
 
@@ -164,12 +173,12 @@ main>input:checked+label {
 
 }
 
-#whitelistCancel{
+#whitelistCancel {
     background-color: #cccccc;
     color: #666666;
 }
 
-button{
+button {
     border: 1px solid #999999;
     filter: brightness(0.95);
     padding: 7px 15px;
@@ -185,7 +194,7 @@ button[disabled] {
     border: 1px solid #999999;
     background-color: #cccccc !important;
     color: #666666 !important;
-    filter:none;
+    filter: none;
     cursor: default;
 }
 
@@ -193,6 +202,52 @@ button[disabled] {
     filter: none;
 }
 
+.text-center {
+    text-align: center;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+.toggle {
+    margin-bottom: 10px;
+}
+
+.labelList {
+    list-style-type: none;
+}
+
+.labelList li {
+    margin-left: 25px;
+}
+
+#tFileResults {
+    width: 490px;
+    height: 490px;
+    padding: 10px;
+    border: 1px solid rgba(0, 0, 0, .2);
+    overflow: auto;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#tFileResults div {
+    display: inline-block;
+}
+
+.breathingRoom {
+    margin-bottom: 5px;
+    margin-top: 5px;
+}
+
+.breathingRoomL {
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+.IRButton {
+    background-color: #2196F3;
+    color: white;
+}
 
 /*
 * Nice checkboxes.
@@ -310,4 +365,54 @@ button[disabled] {
         clear: both;
         float: right;
     }
+}
+
+
+
+
+/* This is for the toggle switch. */
+.toggle-switch {
+    background: #ccc;
+    width: 80px;
+    height: 30px;
+    overflow: hidden;
+    border-radius: 3px;
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 10px;
+}
+
+.toggle-switch:after {
+    content: " ";
+    display: block;
+    width: 40px;
+    height: 30px;
+    background-color: #2196F3;
+    border: 3px solid #fff;
+    border-top: 0;
+    border-bottom: 0;
+    margin-left: -3px;
+    transition: all 0.1s ease-in-out;
+}
+
+.active .toggle-switch:after {
+    margin-left: 43px;
+}
+
+
+.toggle-label {
+    display: inline-block;
+    line-height: 30px;
+}
+
+.toggle-label-off {
+    color: #2196F3;
+}
+
+.active .toggle-label-off {
+    color: #000e;
+}
+
+.active .toggle-label-on {
+    color: #2196F3;
 }

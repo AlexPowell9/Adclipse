@@ -10,9 +10,12 @@
   <!--The below are for Code Mirror. -->
   <script src="external/codeMirror/lib/codemirror.js"></script>
   <link rel="stylesheet" href="external/codeMirror/lib/codemirror.css">
+  <!--The below are for ml5.js -->
+  <script src="external/ml5/ml5@0.2.1.min.js"></script>
   <!--The below are for the extension-->
   <link href="options.css" rel="stylesheet">
   <link href="content.css" rel="stylesheet">
+
 
 </head>
 
@@ -25,6 +28,9 @@
 
     <input id="tab2" type="radio" name="tabs" class="disable-select">
     <label for="tab2" class="disable-select">Detection</label>
+
+    <input id="tab4" type="radio" name="tabs" class="disable-select">
+    <label for="tab4" class="disable-select">Image Recognition</label>
 
     <input id="tab3" type="radio" name="tabs" class="disable-select">
     <label for="tab3" class="disable-select">Whitelist</label>
@@ -158,13 +164,74 @@
           <button id="whitelistCancel" class="button" disabled>Cancel</button>
         </div>
         <div class="codeBox">
-            <textarea name="whitelist" id="whitelist"></textarea>
+          <textarea name="whitelist" id="whitelist"></textarea>
         </div>
       </div>
     </section>
 
+    <!--ml5 Content Tab-->
+    <section id="content4">
+      <div class="sectionContainer">
+        <!--Model-->
+        <h3>Model</h3>
+        <div class="IRSection">
+          <div class="toggle text-center disable-select" id="modelToggle">
+            <div class="toggle-label toggle-label-off">Adclipse Model</div>
+            <div class="toggle-switch"></div>
+            <div class="toggle-label toggle-label-on">Clean Model</div>
+          </div>
+          <strong>Status: </strong><span id='modelStatus'>Loading...</span>
+          <h4>Labels:</h4>
+          <ul class="labelList" id="modelLabels"></ul>
+        </div>
+        <!--Validating-->
+        <h3>Validate</h3>
+        <div class="IRSection">
+          <div class="text-center">
+            <div class="breathingRoom">
+                <label>Select Single Image File: </label><input type="file" accept="image/*" id="vFileUploader">
+            </div>
+            <img crossOrigin id="uploadedImage" width="224" height="224">
+          </div>
+          <div class="breathingRoomL">
+            <button class="IRButton" id="predictButton">Predict</button>
+          </div>
+          <div>
+            <strong>Result: </strong><span id='vResult'>Waiting...</span>
+          </div>
+        </div>
+        <!--Training-->
+        <h3>Train</h3>
+        <div class="IRSection">
+          <div class="text-center">
+            <div class="breathingRoom">
+              <label for="tFileUploader">Select Multiple Files: </label>
+              <input id="tFileUploader" type="file" accept="image/*" multiple />
+            </div>
+            <div id="tFileResults"></div>
+            <div class="breathingRoom">
+              <label for="tPictureLabel">Label Image Set: </label>
+              <input type="text" id="tPictureLabel" value="advertisement" />
+            </div>
+          </div>
+          <div class="breathingRoomL">
+            <button class="IRButton" id="trainButton">Train</button>
+            <button class="IRButton" id="saveButton">Save</button>
+          </div>
+          <div>
+            <strong>Result: </strong><span id='tResult'>Waiting...</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
   </main>
 </body>
 <script src="options.js"></script>
+<script src="options/visual.js"></script>
+<script src="options/detection.js"></script>
+<script src="options/whitelist.js"></script>
+<script src="options/imageRecongition.js"></script>
 
 </html>
