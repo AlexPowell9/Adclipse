@@ -4,8 +4,7 @@
  * https://stackoverflow.com/questions/12971869/background-vs-content-scripts
  */
 
-
-
+"use strict";
 
 var currentTab = location.href;
 // console.log(currentTab);
@@ -46,101 +45,95 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
     }
     var d = extractHostname(currentTab);
     // console.log(d);
-    //Whitelisted.
+
+    // Check if whitelisted
     if (storageCopy.indexOf(d) != -1) {
+        // whitelisted
         whitelisted = true;
         adsBlocked = 0;
         setBadge();
         setIcon();
     } else {
-        highlightAds();
-        setInterval(function () {
-            highlightAds();
-            setBadge();
-            setIcon();
-        }, 2500);
+        evaluateContainers('ocr');
     }
-    //getAdsBlocked();
 
 });
 
-
-/*
- * We set the badge here using the adsBlocked number, which is currently random.
- */
 var adsBlocked;
 
-function getAdsBlocked() {
-    if (whitelisted) {
-        adsBlocked = 0;
-    } else {
-        adsBlocked = randomIntFromInterval(0, 300);
-    }
+/*
+ * We set the badge here using the adsBlocked number
+ */
+function updateBadge() {
     setBadge();
     setIcon();
+    console.log("Ads on this page:", adsBlocked);
 }
 
 /*
- * Highlight Potential Ads
- * For now, I'm just going to highlight all google ads
- * TODO: proper container selection and ad identification
+ * Evaluate Containers
+ * Gives containers to the selected detection module to decide if they are ads
+ * Puts the returned ad containers through the hightlighting function
  */
 
-function highlightAds() {
-    adsBlocked = 0;
-    selectContainers().forEach(container => {
-        // container.style.border = "10px solid red";
-        if (isAd(container)) {
-            if (visualStorageCopy.grayscale.active) {
-                if (!container.classList["adclipseGrayscale"]) {
-                    container.classList.add("adclipseGrayscale");
-                }
-            }
-            if (visualStorageCopy.color.active) {
-                //This is ugly. We first remove all the color containers, and then add new ones.
-                var divs = container.getElementsByClassName("adclipseColor");
-                //No idea why foreach wont work here but I tried like 6 times.
-                for (var i = 0; i < divs.length; i++) {
-                    divs[0].remove();
-                }
-                //Add new ones. This is needed because it has to be a child for the css rules to work.
-                var newDiv = document.createElement("div");
-                newDiv.classList.add("adclipseColor");
-                container.appendChild(newDiv);
-                if (!container.classList["adclipseRelative"]) {
-                    container.classList.add("adclipseRelative");
-                }
-            }
-            if (visualStorageCopy.border.active) {
-                if (!container.classList["adclipseBorder"]) {
-                    container.classList.add("adclipseBorder");
-                }
-            }
-            if (visualStorageCopy.label.active) {
-                //This is ugly. We first remove all the color containers, and then add new ones.
-                var divs = container.getElementsByClassName("adclipseLabel");
-                //No idea why foreach wont work here but I tried like 6 times.
-                for (var i = 0; i < divs.length; i++) {
-                    divs[0].remove();
-                }
-                //Add two new divs, one for the container, and one for the text.
-                var newDiv = document.createElement("div");
-                var textDiv = document.createElement("div");
-                textDiv.textContent = adclipseLabel;
-                textDiv.classList.add("adclipseLabelText");
-                newDiv.classList.add("adclipseLabel");
-                newDiv.appendChild(textDiv);
-                container.appendChild(newDiv);
-                container.classList.add("adclipseRelative");
-                if (!container.classList["adclipseRelative"]) {
-                    container.classList.add("adclipseRelative");
-                }
-            }
+async function evaluateContainers(method) {
+    let containers = selectContainers();
+    if(method === 'ocr') {
+        let ads = await OCR.process(containers);
+        highlightAds(ads);
+        adsBlocked = ads.length;
+        updateBadge();
+    }
+}
 
-            adsBlocked++;
+function highlightAds(containers) {
+    containers.forEach(container => {
+        if (visualStorageCopy.grayscale.active) {
+            if (!container.classList["adclipseGrayscale"]) {
+                container.classList.add("adclipseGrayscale");
+            }
+        }
+        if (visualStorageCopy.color.active) {
+            //This is ugly. We first remove all the color containers, and then add new ones.
+            var divs = container.getElementsByClassName("adclipseColor");
+            //No idea why foreach wont work here but I tried like 6 times.
+            for (var i = 0; i < divs.length; i++) {
+                divs[0].remove();
+            }
+            //Add new ones. This is needed because it has to be a child for the css rules to work.
+            var newDiv = document.createElement("div");
+            newDiv.classList.add("adclipseColor");
+            container.appendChild(newDiv);
+            if (!container.classList["adclipseRelative"]) {
+                container.classList.add("adclipseRelative");
+            }
+        }
+        if (visualStorageCopy.border.active) {
+            if (!container.classList["adclipseBorder"]) {
+                container.classList.add("adclipseBorder");
+            }
+        }
+        if (visualStorageCopy.label.active) {
+            //This is ugly. We first remove all the color containers, and then add new ones.
+            var divs = container.getElementsByClassName("adclipseLabel");
+            //No idea why foreach wont work here but I tried like 6 times.
+            for (var i = 0; i < divs.length; i++) {
+                divs[0].remove();
+            }
+            //Add two new divs, one for the container, and one for the text.
+            var newDiv = document.createElement("div");
+            var textDiv = document.createElement("div");
+            textDiv.textContent = adclipseLabel;
+            textDiv.classList.add("adclipseLabelText");
+            newDiv.classList.add("adclipseLabel");
+            newDiv.appendChild(textDiv);
+            container.appendChild(newDiv);
+            container.classList.add("adclipseRelative");
+            if (!container.classList["adclipseRelative"]) {
+                container.classList.add("adclipseRelative");
+            }
         }
     });
-    console.log('Ads blocked: ' + adsBlocked);
 }
 
 /*
@@ -149,27 +142,17 @@ function highlightAds() {
  * TODO: make this way better
  */
 function selectContainers() {
-    return document.querySelectorAll("[data-google-query-id]");
-}
+    // return document.querySelectorAll("[data-google-query-id]");
 
-/*
- * Returns true if the given container is an ad
- * For now, it returns true always unless the container is 1px
- * TODO: make this actually detect if the container is an ad
- */
-function isAd(container) {
-    if (container.style.width === "1px") return false;
-    else return true;
-}
+    // reddit posts
+    // return document.querySelectorAll("._1poyrkZ7g36PawDueRza-J > article");
 
+    // reddit sidebar ads
+    // return document.querySelectorAll(".ii4q9d-0");
 
-
-/*
- * Simple function for generating random numbers.
- */
-function randomIntFromInterval(min, max) // min and max included
-{
-    return Math.floor(Math.random() * (max - min + 1) + min);
+    // posts and sidebar 
+    // return document.querySelectorAll("._1poyrkZ7g36PawDueRza-J, .ii4q9d-0");
+    return document.querySelectorAll(".ii4q9d-0, .rpBJOHq2PR60pnwJlUyP0 > div");
 }
 
 
@@ -210,6 +193,7 @@ chrome.runtime.onMessage.addListener(
         // console.log(sender.tab ?
         //     "from a content script:" + sender.tab.url :
         //     "from the extension");
+
         if (request.type == "getAdCount")
             sendResponse({
                 adCount: "" + adsBlocked

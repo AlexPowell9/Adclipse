@@ -15,7 +15,7 @@
     "content_scripts": [{
         "matches": ["http://*/*",
             "https://*/*"],
-        "js": ["content.js"],
+        "js": ["content.js", "ocr.js", "html2canvas.min.js", "tesseract.min.js"],
         "css": ["content.css"],
         "run_at": "document_end",
         "all_frames": false,
@@ -34,6 +34,6 @@
         "128": "images/AdclipseIcon128_alt4.png"
     },
     "options_page": "options.html",
-    "permissions": ["tabs", "storage"],
+    "permissions": ["tabs", "activeTab", "<all_urls>", "storage"],
     "manifest_version": 2
 }
