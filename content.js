@@ -54,7 +54,12 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
         setBadge();
         setIcon();
     } else {
-        evaluateContainers('ocr');
+        /*
+         * TODO: pull from options to check which one is enabled.
+         */
+        console.log("Called OCR");
+        //evaluateContainers('ocr');
+        //evaluateContainers('ml5');
     }
 
 });
@@ -78,8 +83,13 @@ function updateBadge() {
 
 async function evaluateContainers(method) {
     let containers = selectContainers();
-    if(method === 'ocr') {
+    if (method === 'ocr') {
         let ads = await OCR.process(containers);
+        highlightAds(ads);
+        adsBlocked = ads.length;
+        updateBadge();
+    } else if (method === 'ml5') {
+        let ads = await ML5.process(containers);
         highlightAds(ads);
         adsBlocked = ads.length;
         updateBadge();
@@ -306,3 +316,66 @@ function extractRootDomain(url) {
     }
     return domain;
 }
+
+/*
+ * ml5.js global definitions. These are initialized in vInitialize().
+ */
+let features;
+let classifier;
+ml5Initialize();
+
+/*
+ * Function to configure feature extractor, classifier, and load ml5 model. We set status and timing before and after to indicate completion.
+ * 
+ * How to time a JS function: https://stackoverflow.com/questions/313893/how-to-measure-time-taken-by-a-function-to-execute
+ * How to load models using ml5 >=0.1.3: https://codepen.io/kotobuki/pen/yRzGZL?editors=0011
+ */
+function ml5Initialize() {
+    console.log("Loading Feature Extractor...");
+    features = ml5.featureExtractor('MobileNet', () => {
+      /*
+       * This is a weird thing that may or may not have been fixed in new version. With more than 2 classes it was refusing to pick up more classes.
+       * https://github.com/ml5js/ml5-library/issues/164
+       */
+      features.numClasses=3;
+      console.log("Loading Classifier...");
+      classifier = features.classification();
+      //ml5LoadModel();
+
+      let img = new Image();
+      img.src = chrome.runtime.getURL("external/ml5/Screenshot_19.png");
+      img.crossOrigin = "anonymous";
+      img.width = 224;
+      img.height = 224;
+      classifier.classify(img, function (err, results) {
+          if (err) {
+              console.log("Error" + err);
+          } else {
+              console.log("Result: " + results);
+          }
+      });
+    });
+  }
+  //Load Model
+  function ml5LoadModel() {
+    console.log("Loading Model...");
+    var t0 = performance.now();
+    //https://developer.chrome.com/extensions/content_scripts
+    classifier.load(chrome.runtime.getURL("external/ml5/model.json"), () => {
+      var t1 = performance.now();
+      console.log("Model Loaded in " + (t1 - t0).toFixed(2) + " ms.");
+  
+      let img = new Image();
+      img.src = chrome.runtime.getURL("external/ml5/Screenshot_19.png");
+      img.crossOrigin = "anonymous";
+      img.width = 224;
+      img.height = 224;
+      classifier.classify(img, function (err, results) {
+          if (err) {
+              console.log("Error" + err);
+          } else {
+              console.log("Result: " + results);
+          }
+      });
+    });
+  }
