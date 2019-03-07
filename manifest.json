@@ -12,6 +12,11 @@
             "128": "images/AdclipseIcon128_alt4.png"
         }
     },
+    "web_accessible_resources": [
+        "external/ml5/model.json",
+        "external/ml5/Screenshot_19.png",
+        "external/ml5/model.weights.bin"
+    ],
     "content_scripts": [{
         "matches": ["http://*/*",
             "https://*/*"],
