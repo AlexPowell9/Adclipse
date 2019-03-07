@@ -114,6 +114,7 @@ function processImages(canvases) {
         img.width = 224;
         img.height = 224;
         img.src = canvas.toDataURL();
+        console.log(img.src);
         promises.push(classifier.classify(img));
     });
 
