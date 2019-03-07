@@ -41,7 +41,7 @@ function ml5Initialize() {
 
 ML5.process = async function (containers) {
     await ml5Initialize();
-    print("Done loading ML5");
+    //print("Done loading ML5");
     var adContainers = [];
     var allCanvases = [];
     var canvasPromises = convertToCanvases(containers);
