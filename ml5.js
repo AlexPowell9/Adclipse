@@ -32,17 +32,6 @@ function ml5Initialize() {
     });
 }
 
-//Load Model
-// function ml5LoadModel() {
-//     console.log("Loading Model...");
-//     var t0 = performance.now();
-//     //https://developer.chrome.com/extensions/content_scripts
-//     classifier.load(chrome.runtime.getURL("external/ml5/model.json"), () => {
-//         var t1 = performance.now();
-//         console.log("Model Loaded in " + (t1 - t0).toFixed(2) + " ms.");
-//     });
-// }
-
 ML5.process = async function (containers) {
     await ml5Initialize();
     print("Done loading ML5");
@@ -58,23 +47,22 @@ ML5.process = async function (containers) {
 
 
     // wait for ml5 to analyze the canvases/containers
-    await Promise.all(processImages(allCanvases, containers)).then(results => {
-        print('Results of all', results);
-        // results.forEach(function (result, index) {
-        //     console.log('Tesseract Result:', tesseractResult(result));
-        //     if (result.text.includes("PROMOTED") ||
-        //         result.text.includes("PRDMDVED") ||
-        //         result.text.includes("FROMOTED") ||
-        //         result.text.includes("ADVERTISEMENT") ||
-        //         result.text.includes("Anvzmsmm")
-        //     ) {
-        //         adContainers.push(containers[index]);
-        //     }
-        // });
+    await Promise.all(processImages(allCanvases)).then(results => {
+        results.forEach(function (result, index) {
+            console.log('ML5 Result ' + index + ':', result);
+            if (result === 'Advertisement') adContainers.push(containers[index]);
+        });
     });
 
-    // return processImages(allCanvases, containers);
-
+    // not sure why Promise.all doesn't work for ml5, but this does what we want
+    // processImages(allCanvases).forEach(function(val, index) {
+    //     val.then(result => {
+    //         console.log('Container ' + index + ' done: ', result);
+    //         if(result === 'Advertisement') adContainers.push(containers[index]);
+    //     });
+    // });
+    // OK JS is the worst. Promise.all wasn't working then it just decided that it would work all of sudden after
+    // I implement its replacement. Excellent
 
     // return the containers that ml5 thinks have ads
     return adContainers;
@@ -110,48 +98,17 @@ function convertToCanvases(containers) {
  * Returns: 
  */
 
-function processImages(canvases, containers) {
+function processImages(canvases) {
     let promises = [];
 
     canvases.forEach(function(canvas, index) {
-        let img = new Image();
-        img.src = canvas.toDataURL();
+        var img = new Image();
         img.crossOrigin = "anonymous";
         img.width = 224;
         img.height = 224;
-        promises.push(
-            classifier.classify(img, function (err, results) {
-                if (err) {
-                    console.log("ML5 Classify Error" + err);
-                } else {
-                    console.log("ML5 Result:", results, img);
-                    if (results === "Advertisement") {
-                        console.log('adcontainer', containers[index]);
-                        containers[index].classList.add('adclipseGrayscale');
-                    }
-                }
-            })
-        );
-
-        // promises.push(new Promise(function(resolve, reject) {
-        //     let img = new Image();
-        //     img.src = canvas.toDataURL();
-        //     img.crossOrigin = "anonymous";
-        //     img.width = 224;
-        //     img.height = 224;
-        //     classifier.classify(img, function (err, results) {
-        //         if (err) {
-        //             console.log("ML5 Classify Error" + err);
-        //             resolve(err);
-        //         } else {
-        //             console.log("ML5 Result: " + results, canvas);
-        //             if (results === "Advertisement") {
-        //                 promises.push(containers[index]);
-        //             }
-        //             resolve(results);
-        //         }
-        //     });
-        // }));
+        img.src = canvas.toDataURL();
+        promises.push(classifier.classify(img));
     });
+
     return promises;
 }
