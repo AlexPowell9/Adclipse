@@ -9,6 +9,13 @@ var adsFound = 0;
 var features;
 var classifier;
 
+/*
+ * Function to configure feature extractor, classifier, and load ml5 model. We set status and timing before and after to indicate completion.
+ *
+ * How to time a JS function: https://stackoverflow.com/questions/313893/how-to-measure-time-taken-by-a-function-to-execute
+ * How to load models using ml5 >=0.1.3: https://codepen.io/kotobuki/pen/yRzGZL?editors=0011
+ */
+
 function ml5Initialize() {
     return new Promise(function(resolve, reject) {
         console.log("Loading Feature Extractor...");
@@ -81,8 +88,8 @@ function convertToCanvases(containers) {
     let options = {
         logging: false,
         ignoreElements: function (element) {
-            return element.tagName.toLowerCase() == 'iframe' || element.tagName.toLowerCase() == 'img';
-            // return element.tagName.toLowerCase() == 'iframe';
+            // return element.tagName.toLowerCase() == 'iframe' || element.tagName.toLowerCase() == 'img';
+            return element.tagName.toLowerCase() == 'iframe';
         }
     };
     containers.forEach(container => {
@@ -95,7 +102,7 @@ function convertToCanvases(containers) {
 /*
  * ML5 Images
  * Takes in canvases, converts them to image data, puts image data through Ml5
- * Returns: 
+ * Returns: promises from the ml5 classifier
  */
 
 function processImages(canvases) {

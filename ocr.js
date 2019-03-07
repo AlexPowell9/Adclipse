@@ -8,49 +8,6 @@ let OCR = {};
 var adsFound = 0;
 
 OCR.process = async function(containers) {
-
-    /////////////////////////////////////////////////////////////////////////
-    // THE OLDER METHOD
-    /////////////////////////////////////////////////////////////////////////
-
-    // containers.forEach(container => {
-    //     if(container !== null && container !== undefined && container !== "") {
-    //         options = {
-    //             logging: false,
-    //             ignoreElements: function(element) {
-    //                 return element.tagName.toLowerCase() == 'iframe' || element.tagName.toLowerCase() == 'img';
-    //                 // return element.tagName.toLowerCase() == 'iframe';
-    //             }
-    //         };
-    //         try {
-    //             html2canvas(container, options).then((canvas) => {
-    //                 let ctx = canvas.getContext('2d');
-    //                 var expanded = ctx.getImageData(0,0, canvas.width, canvas.height);
-
-    //                 Tesseract.recognize(expanded).then(function(result) {
-    //                     console.log("TESSERACT RECOGNIZED:", result);
-    //                     if(result.text.includes("PROMOTED") 
-    //                         || result.text.includes("PRDMDVED")
-    //                         || result.text.includes("FROMOTED")
-    //                         || result.text.includes("ADVERTISEMENT")
-    //                         || result.text.includes("Anvzmsmm")
-    //                         ) {
-    //                         // container.classList.add("adclipse-ad");
-    //                         foundAd(container);
-    //                     }
-    //                 });
-    //             });               
-
-    //         } catch(e) {
-    //             console.log('something went wrong');
-    //         }
-    //     }
-    // });
-
-    /////////////////////////////////////////////////////////////////////////
-    // THE DEBATABLY CLEANER METHOD
-    /////////////////////////////////////////////////////////////////////////
-
     var adContainers = [];
     var allCanvases = [];
     var canvasPromises = convertToCanvases(containers);
