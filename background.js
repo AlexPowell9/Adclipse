@@ -13,7 +13,6 @@ chrome.browserAction.setBadgeBackgroundColor({
   color: '#525252'
 });
 
-
 /*
  * This is what makes the tabs have unique badge numbers. 
  * https://stackoverflow.com/questions/32168449/how-can-i-get-different-badge-value-for-every-tab-on-chrome
@@ -68,6 +67,12 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         tabId: sender.tab.id
       });
     }
+  }
+  //Deal with icon messages
+  if (message.classifyImage !== null) {
+    sendResponse({
+      response: "huh?"
+    });
   }
 });
 

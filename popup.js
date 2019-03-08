@@ -54,11 +54,11 @@ document.getElementById("logo").addEventListener("click", function () {
   if (disabled) {
     document.getElementById("logo").style.backgroundImage = "url('images/Toggle_Off.svg')";
     //Add domain to whitelist
-    updateWhitelist(extractRootDomain(currentTab.url), true);
+    updateWhitelist(extractHostname(currentTab.url), true);
   } else {
     document.getElementById("logo").style.backgroundImage = "url('images/Toggle_On.svg')";
     //Remove domain from whitelist
-    updateWhitelist(extractRootDomain(currentTab.url), false);
+    updateWhitelist(extractHostname(currentTab.url), false);
   }
 });
 
@@ -116,7 +116,7 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
   if (returnedStorage['whitelist'] !== undefined) {
     storageCopy = returnedStorage['whitelist'];
   }
-  var d = extractRootDomain(currentTab.url);
+  var d = extractHostname(currentTab.url);
   //Whitelisted.
   if (storageCopy.indexOf(d) != -1) {
     disabled = true;
@@ -137,7 +137,7 @@ function updateWhitelist(domain, add) {
   //Add or remove
   if (add) {
     //Check if entry already exists
-    if (storageCopy.indexOf(domain) === -1) {
+    if (storageCopy.indexOf(domain) == -1) {
       storageCopy.push(domain);
     }
   } else {

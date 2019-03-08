@@ -4,10 +4,34 @@
  * https://stackoverflow.com/questions/12971869/background-vs-content-scripts
  */
 
+"use strict";
 
 var currentTab = location.href;
 // console.log(currentTab);
 var whitelisted = false;
+//This is the label we use if the label option is applied. We update this to be the same as storage.
+var adclipseLabel = "Adclipse";
+
+/*
+ * Get Visual Options from storage and apply them.
+ */
+var visualStorageCopy = [];
+chrome.storage.local.get("visual", function (returnedStorage) {
+    if (returnedStorage['visual'] !== undefined) {
+        visualStorageCopy = JSON.parse(returnedStorage['visual']);
+    } else {
+        //Does not exist, so we create it with defaults
+        visualStorageCopy = getDefaults();
+        chrome.storage.local.set({
+            "visual": JSON.stringify(visualStorageCopy)
+        }, function () {
+            //Callback
+            console.log("Visual Settings Updated!");
+        });
+    }
+    adclipseLabel = visualStorageCopy.label.text;
+    applyVisualOptions();
+});
 
 /*
  * Check if domain is whitelisted, change display accordingly.
@@ -19,51 +43,107 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
     if (returnedStorage['whitelist'] !== undefined) {
         storageCopy = returnedStorage['whitelist'];
     }
-    var d = extractRootDomain(currentTab);
+    var d = extractHostname(currentTab);
     // console.log(d);
-    //Whitelisted.
+
+    // Check if whitelisted
     if (storageCopy.indexOf(d) != -1) {
+        // whitelisted
         whitelisted = true;
+        adsBlocked = 0;
+        setBadge();
+        setIcon();
+    } else {
+        /*
+         * TODO: pull from options to check which one is enabled.
+         */
+        // console.log("Called OCR");
+        // evaluateContainers('ocr');
+        evaluateContainers('ml5');
     }
-    //getAdsBlocked();
-    highlightAds();
-    setInterval(function() {
-       highlightAds();
-       setBadge();
-       setIcon();
-    }, 2500);
+
 });
 
-
-/*
- * We set the badge here using the adsBlocked number, which is currently random.
- */
 var adsBlocked;
 
-function getAdsBlocked() {
-    if (whitelisted) {
-        adsBlocked = 0;
-    } else {
-        adsBlocked = randomIntFromInterval(0, 300);
-    }
+/*
+ * We set the badge here using the adsBlocked number
+ */
+function updateBadge() {
     setBadge();
     setIcon();
+    console.log("Ads on this page:", adsBlocked);
 }
 
 /*
- * Highlight Potential Ads
- * For now, I'm just going to highlight all google ads
- * TODO: proper container selection and ad identification
+ * Evaluate Containers
+ * Gives containers to the selected detection module to decide if they are ads
+ * Puts the returned ad containers through the hightlighting function
  */
 
-function highlightAds() {
-    adsBlocked = 0;
-    selectContainers().forEach(container => {
-        // container.style.border = "10px solid red";
-        if(isAd(container)) container.classList.add("adclipse-ad");
-        adsBlocked++;
+async function evaluateContainers(method) {
+    let containers = selectContainers();
+    if (method === 'ocr') {
+        let ads = await OCR.process(containers);
+        highlightAds(ads);
+        adsBlocked = ads.length;
+        updateBadge();
+    } else if (method === 'ml5') {
+        let ads = await ML5.process(containers);
+        highlightAds(ads);
+        adsBlocked = ads.length;
+        updateBadge();
+    }
+}
+
+function highlightAds(containers) {
+    containers.forEach(container => {
+        if (visualStorageCopy.grayscale.active) {
+            if (!container.classList["adclipseGrayscale"]) {
+                container.classList.add("adclipseGrayscale");
+            }
+        }
+        if (visualStorageCopy.color.active) {
+            //This is ugly. We first remove all the color containers, and then add new ones.
+            var divs = container.getElementsByClassName("adclipseColor");
+            //No idea why foreach wont work here but I tried like 6 times.
+            for (var i = 0; i < divs.length; i++) {
+                divs[0].remove();
+            }
+            //Add new ones. This is needed because it has to be a child for the css rules to work.
+            var newDiv = document.createElement("div");
+            newDiv.classList.add("adclipseColor");
+            container.appendChild(newDiv);
+            if (!container.classList["adclipseRelative"]) {
+                container.classList.add("adclipseRelative");
+            }
+        }
+        if (visualStorageCopy.border.active) {
+            if (!container.classList["adclipseBorder"]) {
+                container.classList.add("adclipseBorder");
+            }
+        }
+        if (visualStorageCopy.label.active) {
+            //This is ugly. We first remove all the color containers, and then add new ones.
+            var divs = container.getElementsByClassName("adclipseLabel");
+            //No idea why foreach wont work here but I tried like 6 times.
+            for (var i = 0; i < divs.length; i++) {
+                divs[0].remove();
+            }
+            //Add two new divs, one for the container, and one for the text.
+            var newDiv = document.createElement("div");
+            var textDiv = document.createElement("div");
+            textDiv.textContent = adclipseLabel;
+            textDiv.classList.add("adclipseLabelText");
+            newDiv.classList.add("adclipseLabel");
+            newDiv.appendChild(textDiv);
+            container.appendChild(newDiv);
+            container.classList.add("adclipseRelative");
+            if (!container.classList["adclipseRelative"]) {
+                container.classList.add("adclipseRelative");
+            }
+        }
     });
-    console.log('Ads blocked: ' + adsBlocked);
 }
 
 /*
@@ -72,143 +152,17 @@ function highlightAds() {
  * TODO: make this way better
  */
 function selectContainers() {
-	let selectContainerMethods = [getVisibleContainers];
-	let containers = [];
-	selectContainerMethods.forEach((method) => {
-		containers = method(containers);
-	})
-	return containers;
-}
+    // return document.querySelectorAll("[data-google-query-id]");
 
-let googleDataIdSelector = (containers) => {
-    return document.querySelectorAll("[data-google-query-id]");
-}
+    // reddit posts
+    // return document.querySelectorAll("._1poyrkZ7g36PawDueRza-J > article");
 
-/*
-*   returns an array of all visible nodes on the screen
-*/
-let getVisibleContainers = (containers) => {
-	let vis  = [];
-	containers.forEach((container) => {
-		if(isVisible(container))vis.push(container);
-	});
-	return vis
-}
+    // reddit sidebar ads
+    // return document.querySelectorAll(".ii4q9d-0");
 
-/*
-*   returns true if a node is at an absolute pixel value on the screen,
-*   false otherwise
-*/
-let isAtPoint = (node, point) => {
-    //TODO
-    return true;
-}
-
-let containerSelector = {
-    getAspectRatio: (node) => {
-        return this.getWidth(node)/this.getHeight(node);
-    }
-    findByAspectRatio: (tree, minRatio, maxRatio, iterationType) => {
-        let iter = treeIterators.getIterator(iterationType || treeIterators.DEPTHFIRST);
-        let returnNodes = [];
-        while(iter.hasNext()){
-            let curr = iter.next();
-            if(getAspectRatio(curr) >= minRatio && getAspectRatio(curr) <= maxRatio)returnNodes.push(curr);
-        }
-        return returnNodes;
-    }
-    getWidth: (node) => {
-        return node.style.width;
-    },
-    getHeight: (node) => {
-        return node.style.height;
-    }
-}
-
-/*
-*   A module for iterating through the document tree
-*/
-let treeIterators = {
-    /*
-    *   returns the node with the least depth that is visble at a certain point on screen
-    *   if no point availible it will return null
-    */
-    iterationMethods:{
-        DEPTHFIRST: (getNext) => {
-        }
-    }
-    DEFAULT_ITERATION = iterationMethods.DEPTHFIRST; 
-    findMaxDepthAtPoint: (document, point) => {
-        return findMaxDepthRecursive(document.body);
-    },
-    //recursive helper function
-    findMaxDepthRecursive: (node, point, depth) => {
-        if(isAtPoint(node, point)){
-            returned = [];
-            node.childNodes.forEach((node) => {
-                if(isAtPoint(node, point))returned.push(findMaxDepthRecursive(node, point, depth+1))
-            })
-            if(returned.length === 0)return {node: node, depth: depth};
-            else if(returned.length === 1)return returned[0];
-            else{
-                //makes use of the array reduce, basically just finds the node with the greatest depth and returns it
-                return returned.reduce((acc, currValue, currIndex, arr) => {
-                    if(currValue.depth > acc.depth)acc = currValue;
-                }, {depth:0});
-            }
-        }
-        else{
-            return null;
-        }
-    }
-    getIterator(tree, method){
-        if(!method)method = this.DEFAULT_ITERATION;
-        let iter = {
-            tree = tree,
-            currentNode: tree.root,
-            hasNext(){
-                return (method.getNext()!==null)
-            }
-        }
-    }
-}
-
-/*
-*   returns true if an ad is visble
-*/
-let isVisible = (container) => {
-    //TODO make this check if the container is visible
-    return container.style && container.style.display!="none";
-};
-
-/*
-*   Get all of the nodes inside of the document body
-*/
-let getAllContainers = () => {
-	let containers =[];
-	//TODO change this, ineffiecent
-    containers = document.body.getElementsByTagName("*");
-	return object.values(containers);
-}
-
-/*
- * Returns true if the given container is an ad
- * For now, it returns true always unless the container is 1px
- * TODO: make this actually detect if the container is an ad
- */
-function isAd(container) {
-    if(container.style.width === "1px") return false;
-    else return true;
-}
-
-
-
-/*
- * Simple function for generating random numbers.
- */
-function randomIntFromInterval(min, max) // min and max included
-{
-    return Math.floor(Math.random() * (max - min + 1) + min);
+    // posts and sidebar 
+    // return document.querySelectorAll("._1poyrkZ7g36PawDueRza-J, .ii4q9d-0");
+    return document.querySelectorAll(".ii4q9d-0, .rpBJOHq2PR60pnwJlUyP0 > div");
 }
 
 
@@ -249,11 +203,81 @@ chrome.runtime.onMessage.addListener(
         // console.log(sender.tab ?
         //     "from a content script:" + sender.tab.url :
         //     "from the extension");
+
         if (request.type == "getAdCount")
             sendResponse({
                 adCount: "" + adsBlocked
             });
     });
+
+
+/*
+ * Apply visual options from storage.
+ */
+function applyVisualOptions() {
+    const body = document.querySelector('body');
+    /* 
+     * GrayScale Options
+     */
+    body.style.setProperty('--grayscaleFactor', visualStorageCopy.grayscale.factor / 100);
+    /* 
+     * Color Options
+     */
+    body.style.setProperty('--colorOpacity', visualStorageCopy.color.opacity / 100);
+    body.style.setProperty('--colorColor', visualStorageCopy.color.color);
+    /* 
+     * Border Options
+     */
+    body.style.setProperty('--borderThickness', visualStorageCopy.border.thickness + "px");
+    body.style.setProperty('--borderStyle', visualStorageCopy.border.style);
+    body.style.setProperty('--borderColor', visualStorageCopy.border.color);
+    /*
+     * Label Options
+     */
+    body.style.setProperty('--labelFontSize', visualStorageCopy.label.fontSize + "px");
+    body.style.setProperty('--labelOpacity', visualStorageCopy.label.opacity / 100);
+    body.style.setProperty('--labelTextTop', visualStorageCopy.label.textTop + "%");
+    body.style.setProperty('--labelTextAlign', visualStorageCopy.label.textAlign);
+    body.style.setProperty('--labelColor', visualStorageCopy.label.color);
+    //Label text is done dynamically
+}
+
+
+/*
+ * Return array of default option values, for when there are no options present in storage.
+ */
+function getDefaults() {
+    var storage = {};
+    //Grayscale
+    storage.grayscale = {
+        "active": true,
+        "factor": 0.5
+    };
+    //Color
+    storage.color = {
+        "active": false,
+        "color": "#000000",
+        "opacity": 0.5
+    };
+    //Border
+    storage.border = {
+        "active": false,
+        "color": "#ff0000",
+        "style": "solid",
+        "thickness": 10
+    };
+    //Label
+    storage.label = {
+        "active": false,
+        "text": "Adclipse Identified Ad",
+        "fontSize": 10,
+        "textAlign": "center",
+        "opacity": 0.5,
+        "paddingTop": 100,
+        "color": "#000000"
+    };
+    return storage;
+}
 
 
 /*
