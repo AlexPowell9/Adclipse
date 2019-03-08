@@ -16,7 +16,7 @@ let selectContainerByRatio = (minRatio, maxRatio) => {
     
 }
 
-let selectRecursive(node, minRatio, maxRatio, selected) => {
+let selectRecursive = (node, minRatio, maxRatio, selected) => {
     node.childNodes.forEach((node) => {
         if(node.height !== 0 && node.width !== 0){
             nRatio = getWidth(node)/getHeight(node);
@@ -29,7 +29,7 @@ let selectRecursive(node, minRatio, maxRatio, selected) => {
 /**
  * Selects the node with the most children
 */
-let selectByChildren(node) => {
+let selectByChildren = (node) => {
     let returnNode = node
     let children = node.childNodes.length;
     node.childNodes.forEach((node) => {
@@ -52,7 +52,7 @@ let selectAllByChildren = (node, depth, sorted) => {
     node.childNodes.forEach((node, index) => {
         selected.push({
             node: node,
-            count: countChildren(node, depth);
+            count: countChildren(node, depth)
         });
     });
     if(sorted){
@@ -76,7 +76,7 @@ let countChildrenRec = (node, depth, maxDepth) => {
     });
     return count;
 }
-let selectMaxChilren(node, list){
+let selectMaxChilren = (node, list) => {
     let children = node.childNodes.length;
     node.childNodes.forEach((node) => {
         if(node.childNodes.length > children) ;   
