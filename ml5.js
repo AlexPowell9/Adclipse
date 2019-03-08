@@ -47,18 +47,24 @@ ML5.process = async function (containers) {
     var canvasPromises = convertToCanvases(containers);
 
     // wait for html2canvas to convert containers to canvases
+    var tC0 = performance.now();
     await Promise.all(canvasPromises).then(canvases => {
         allCanvases = canvases;
         console.log("converted all containers");
+        var tC1 = performance.now();
+        console.log("HTML2Canvas finished in " + (tC1 - tC0).toFixed(2) + " ms.");
     });
 
 
     // wait for ml5 to analyze the canvases/containers
+    var tM0 = performance.now();
     await Promise.all(processImages(allCanvases)).then(results => {
         results.forEach(function (result, index) {
             console.log('ML5 Result ' + index + ':', result);
             if (result === 'Advertisement' || result === 'Promoted') adContainers.push(containers[index]);
         });
+        var tM1 = performance.now();
+        console.log("ML5 finished in " + (tM1 - tM0).toFixed(2) + " ms.");
     });
 
     // not sure why Promise.all doesn't work for ml5, but this does what we want
@@ -86,9 +92,6 @@ ML5.process = async function (containers) {
  * Returns: html2canvas promises
  */
 function convertToCanvases(containers) {
-    var t0 = performance.now();
-    
-    console.log()
     let promises = [];
     let options = {
         logging: false,
@@ -100,8 +103,6 @@ function convertToCanvases(containers) {
     containers.forEach(container => {
         promises.push(html2canvas(container, options))
     });
-    var t1 = performance.now();
-    console.log("HTML2Canvas finished in " + (t1 - t0).toFixed(2) + " ms.");
     return promises;
 }
 
@@ -112,7 +113,6 @@ function convertToCanvases(containers) {
  * Returns: promises from the ml5 classifier
  */
 function processImages(canvases) {
-    var t0 = performance.now();
     let promises = [];
 
     canvases.forEach(function (canvas, index) {
@@ -124,8 +124,5 @@ function processImages(canvases) {
         console.log(img.src);
         promises.push(classifier.classify(img));
     });
-
-    var t1 = performance.now();
-    console.log("ML5 Classified Images in " + (t1 - t0).toFixed(2) + " ms.");
     return promises;
 }
