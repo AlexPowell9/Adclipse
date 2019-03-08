@@ -57,7 +57,7 @@ ML5.process = async function (containers) {
     await Promise.all(processImages(allCanvases)).then(results => {
         results.forEach(function (result, index) {
             console.log('ML5 Result ' + index + ':', result);
-            if (result === 'Advertisement') adContainers.push(containers[index]);
+            if (result === 'Advertisement' || result === 'Promoted') adContainers.push(containers[index]);
         });
     });
 
