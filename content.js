@@ -163,11 +163,39 @@ function selectContainers() {
     // posts and sidebar 
     // return document.querySelectorAll("._1poyrkZ7g36PawDueRza-J, .ii4q9d-0");
 
-    //return document.querySelectorAll(".ii4q9d-0, .rpBJOHq2PR60pnwJlUyP0 > div");
-
-    //get main content
-    let containers = selectAllByChildren(document, 3, true);
-    return containers;
+    // return document.querySelectorAll(".ii4q9d-0, .rpBJOHq2PR60pnwJlUyP0 > div");
+    // //get main content
+    // let mainCont = document.getElementsByClassName("rpBJOHq2PR60pnwJlUyP0 s1rcgrht-0 eEVuIz");
+    // console.log(mainCont);
+    // Array.from(mainCont).forEach((el) => {
+    //     console.log(countChildren(el, 1));
+    // })
+    // let containers = selectAllByChildren(document, 1, true);
+    // let co = Array.from(document.getElementsByTagName("*"));
+    // let c = [];
+    // containers.forEach((container) => {
+    //     c.push(container.node);
+    // })
+    // let cont = selectByChildren(document.body);
+    // console.log(containers);
+    // console.log(c[0]);
+    document.addEventListener("DOMContentLoaded", () => {
+        let mainCont = document.getElementsByClassName("rpBJOHq2PR60pnwJlUyP0 s1rcgrht-0 eEVuIz");
+    console.log(mainCont);
+    Array.from(mainCont).forEach((el) => {
+        console.log(countChildren(el, 1));
+    })
+    let containers = selectAllByChildren(document, 1, true);
+    let co = Array.from(document.getElementsByTagName("*"));
+    let c = [];
+    containers.forEach((container) => {
+        c.push(container.node);
+    })
+    let cont = selectByChildren(document.body);
+    console.log(containers);
+    console.log(c[0]);
+    });
+    return [];
 }
 
 //returns a node list of elements
@@ -203,12 +231,12 @@ let selectRecursive = (node, minRatio, maxRatio, selected) => {
 */
 let selectByChildren = (node) => {
     let returnNode = node
-    let children = node.childNodes.length;
+    let children = countChildren(node, 1);
     node.childNodes.forEach((node) => {
         let curr= selectByChildren(node);
-        if(curr.childNodes.length > children){
+        if(countChildren(curr, 1) > children){
             returnNode = curr;
-            children = curr.childNodes;
+            children = countChildren(curr, 1);
         }
     });
     return returnNode;
@@ -222,6 +250,7 @@ let selectAllByChildren = (node, depth, sorted) => {
     if(!depth)depth = 1;
     let selected = [];
     node.childNodes.forEach((node, index) => {
+        selected = selected.concat(selectAllByChildren(node, depth, true));
         selected.push({
             node: node,
             count: countChildren(node, depth)
@@ -229,22 +258,22 @@ let selectAllByChildren = (node, depth, sorted) => {
     });
     if(sorted){
         selected.sort((a,b) => {
-            return a.count-b.count;     
+            return b.count-a.count;     
         });
     }
     return selected;
 }
 
 let countChildren = (node, depth) => {
-    let numChild = 0;
-    countChildrenRec(node, 0, depth);
+    return node.childElementCount || 0;
+    return countChildrenRec(node, 0, depth);
 }
 
 let countChildrenRec = (node, depth, maxDepth) => {
-    if(depth == maxDepth)return 1;
-    let count = 1;
+    if(depth >= maxDepth)return 1;
+    let count = 0;
     node.childNodes.forEach((node, index) => {
-        count += countChildRec(node, depth++, maxDepth);
+        count += countChildrenRec(node, depth+1, maxDepth);
     });
     return count;
 }
