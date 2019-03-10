@@ -69,10 +69,10 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     }
   }
   //Deal with 
-  if (message.dimensions !== null && message.dimensions !== undefined) {
+  if (message.getTabScreenshot !== null && message.getTabScreenshot !== undefined) {
     //console.log("Called Capture!", message.dimensions);
     capture(sender.tab.id, message.dimensions).then((data) => {
-      //Respond with data url of canvas
+      //Respond with data url of the screenshot
       sendResponse({
         response: data
       });
@@ -114,45 +114,12 @@ function setIcon(iconDisabled) {
 }
 
 
-var canvas = null;
-
 function capture(tabId, dimensions) {
   console.log("Capture got called", dimensions);
   return new Promise((resolve, reject) => {
     chrome.tabs.get(tabId, (tab) => {
-      // chrome.tabs.captureVisibleTab(tab.windowId, function (img) {
-      //   resolve(img);
-      // });
-      chrome.tabs.captureVisibleTab(tab.windowId, {
-        format: "png"
-      }, (dataUrl) => {
-        if (!canvas) {
-          canvas = document.createElement("canvas");
-          document.body.appendChild(canvas);
-        }
-        const image = new Image();
-        image.onload = function () {
-          //Trim the screenshot to specified dimensions
-          canvas.width = dimensions.width;
-          canvas.height = dimensions.height;
-          var context = canvas.getContext("2d");
-          context.drawImage(image,
-            dimensions.left, dimensions.top,
-            dimensions.width, dimensions.height,
-            0, 0,
-            dimensions.width, dimensions.height
-          );
-          // return canvas.toDataURL("image/png");
-          var croppedDataUrl = canvas.toDataURL("image/png");
-          resolve(croppedDataUrl);
-          // //This is for viewing the trimmed areas in new tabs
-          // chrome.tabs.create({
-          //   url: croppedDataUrl,
-          //   windowId: tab.windowId
-          // });
-        }
-        image.src = dataUrl;
-        console.log(canvas.toDataURL("image/png"));
+      chrome.tabs.captureVisibleTab(tab.windowId, function (dataUrl) {
+        resolve(dataUrl);
       });
     });
   });

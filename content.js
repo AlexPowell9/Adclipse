@@ -60,16 +60,20 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
         // console.log("Called OCR");
         // evaluateContainers('ocr');
         evaluateContainers('ml5');
-       //window.addEventListener("scroll", runOnScroll);
+        //window.addEventListener("scroll", runOnScroll);
 
     }
 
 });
 
-var runOnScroll =  function(evt) {
-    console.log("Scrolling!");
-    evaluateContainers('ml5');
-};
+// var lastPosition=0;
+// var runOnScroll =  function(evt) {
+//     var scrollTop = window.pageYOffset;
+//     if((scrollTop-lastPosition) >= window.innerHeight/2){
+//         evaluateContainers('ml5');
+//         lastPosition=scrollTop;
+//     }
+// };
 
 var adsBlocked;
 

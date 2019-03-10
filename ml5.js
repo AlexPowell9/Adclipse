@@ -38,21 +38,34 @@ function ml5Initialize() {
     });
 }
 
+//This is the variable where the screenshot is stored.
+var dataUrl = null;
+/*
+ * This is the processing function that gets called from the content.js. 
+ * Put anything that needs to run in here.
+ */
 ML5.process = async function (containers) {
     var t0 = performance.now();
     if (!classifier) {
         await ml5Initialize();
     }
+
+    //Get Screenshot of current tab from background
+    var tS0 = performance.now();
+    await GetTabScreenshot().then((response) => {
+        dataUrl = response.response; //Screenshot in DataUrl form
+        var tS1 = performance.now();
+        console.log("Got Tab Screenshot in " + (tS1 - tS0).toFixed(2) + " ms.");
+    });
+
     //print("Done loading ML5");
     var adContainers = [];
     var allCanvases = [];
     var canvasPromises = convertToCanvases(containers);
 
+
     // wait for html2canvas to convert containers to canvases
     var tC0 = performance.now();
-    /*
-     * TODO: Asking for a screenshot, wait to return.
-     */
     await Promise.all(canvasPromises).then(canvases => {
         //console.log(canvases);
         allCanvases = canvases;
@@ -94,7 +107,7 @@ ML5.process = async function (containers) {
 
 /*
  * Convert To Canvas
- * Takes in containers and converts them to images, based on https://github.com/tlrobinson/element-capture 
+ * Takes in containers and figures out the dimensions, based on https://github.com/tlrobinson/element-capture 
  * 
  * SORTING HAT HACK WARNING! I dont bother sending elements that are outside of the screen area, so I pass a null instead. I do it this way because I didnt want to redo our whole architecture. 
  * 
@@ -120,11 +133,6 @@ function convertToCanvases(containers) {
             promises.push(null);
             return;
         }
-        // while (element !== document.body) {
-        //     dimensions.top += element.offsetTop;
-        //     dimensions.left += element.offsetLeft;
-        //     element = element.offsetParent;
-        // }
         dimensions.width = container.offsetWidth;
         dimensions.height = container.offsetHeight;
         // console.log(dimensions);
@@ -139,12 +147,8 @@ function convertToCanvases(containers) {
             promises.push(null);
             return;
         }
-        promises.push(send({
-            dimensions: dimensions
-        }));
+        promises.push(prepareImage(dimensions));
     });
-    // containers = newContainers;
-    console.log("Sending ", promises.length);
     return promises;
 }
 
@@ -173,7 +177,7 @@ function processImages(canvases) {
         //     var w = window.open("");
         //     w.document.write(img.outerHTML);
         // }
-        img.src = canvas.response;
+        img.src = canvas;
         promises.push(classifier.classify(img));
     });
     return promises;
@@ -182,13 +186,50 @@ function processImages(canvases) {
 /*
  * This function handles passing the containers to to the backend for screenshot processing and handles response.
  */
-function send(request) {
+function GetTabScreenshot() {
     return new Promise(function (resolve, reject) {
-        chrome.extension.sendMessage(request, function (response) {
-            //console.log("Got Response!");
-            //console.log(response);
+        chrome.extension.sendMessage({
+            getTabScreenshot: true
+        }, function (response) {
+            // console.log("Got Response!");
+            // console.log(response);
             resolve(response);
-            //resolve(SlapNChop(request, response));
         });
+    });
+}
+
+
+var canvas = null;
+/*
+ * This function crops the screenshot to fit the dimensions of the element. Based on https://github.com/tlrobinson/element-capture
+ */
+function prepareImage(dimensions) {
+    return new Promise(function (resolve, reject) {
+        if (!canvas) {
+            canvas = document.createElement("canvas");
+            document.body.appendChild(canvas);
+        }
+        const image = new Image();
+        image.onload = function () {
+            //Trim the screenshot to specified dimensions
+            canvas.width = dimensions.width;
+            canvas.height = dimensions.height;
+            var context = canvas.getContext("2d");
+            context.drawImage(image,
+                dimensions.left, dimensions.top,
+                dimensions.width, dimensions.height,
+                0, 0,
+                dimensions.width, dimensions.height
+            );
+            var croppedDataUrl = canvas.toDataURL("image/png");
+            resolve(croppedDataUrl);
+            // //This is for viewing the trimmed areas in new tabs
+            // chrome.tabs.create({
+            //   url: croppedDataUrl,
+            //   windowId: tab.windowId
+            // });
+        }
+        image.src = dataUrl;
+        //console.log(canvas.toDataURL("image/png"));
     });
 }
