@@ -116,6 +116,11 @@ ML5.process = async function (containers) {
 function convertToCanvases(containers) {
     let promises = [];
     containers.forEach(container => {
+        //Ignore already identified ads
+        if (container.classList.contains("adclipseIdentified")) {
+            promises.push(null);
+            return;
+        }
         //Define dimensions for position on page
         let dimensions = {};
         dimensions.top = -window.scrollY;
@@ -138,11 +143,11 @@ function convertToCanvases(containers) {
         // console.log(dimensions);
         // console.log("Width", window.innerWidth);
         // console.log("Height", window.innerHeight);
-        if (dimensions.top > window.innerHeight) {
+        if (dimensions.top > window.innerHeight || dimensions.top < 0) {
             //Sorting hat hack. See description for more details.
             promises.push(null);
             return;
-        } else if (dimensions.left > window.innerWidth) {
+        } else if (dimensions.left > window.innerWidth || dimensions.left < 0) {
             //Sorting hat hack. See description for more details.
             promises.push(null);
             return;
@@ -171,12 +176,12 @@ function processImages(canvases) {
         img.crossOrigin = "anonymous";
         img.width = 224;
         img.height = 224;
-        // //This is for debugging the images we are putting through ml5.
-        // img.onload = () => {
-        //     console.log("Called?");
-        //     var w = window.open("");
-        //     w.document.write(img.outerHTML);
-        // }
+        //This is for debugging the images we are putting through ml5.
+        img.onload = () => {
+            console.log("Called?");
+            var w = window.open("");
+            w.document.write(img.outerHTML);
+        }
         img.src = canvas;
         promises.push(classifier.classify(img));
     });
