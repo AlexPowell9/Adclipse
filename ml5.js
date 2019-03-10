@@ -15,9 +15,8 @@ var classifier;
  * How to time a JS function: https://stackoverflow.com/questions/313893/how-to-measure-time-taken-by-a-function-to-execute
  * How to load models using ml5 >=0.1.3: https://codepen.io/kotobuki/pen/yRzGZL?editors=0011
  */
-
 function ml5Initialize() {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         console.log("Loading Feature Extractor...");
         features = ml5.featureExtractor('MobileNet', () => {
             /*
@@ -40,6 +39,7 @@ function ml5Initialize() {
 }
 
 ML5.process = async function (containers) {
+    var t0 = performance.now();
     await ml5Initialize();
     //print("Done loading ML5");
     var adContainers = [];
@@ -47,18 +47,24 @@ ML5.process = async function (containers) {
     var canvasPromises = convertToCanvases(containers);
 
     // wait for html2canvas to convert containers to canvases
+    var tC0 = performance.now();
     await Promise.all(canvasPromises).then(canvases => {
         allCanvases = canvases;
         console.log("converted all containers");
+        var tC1 = performance.now();
+        console.log("HTML2Canvas finished in " + (tC1 - tC0).toFixed(2) + " ms.");
     });
 
 
     // wait for ml5 to analyze the canvases/containers
+    var tM0 = performance.now();
     await Promise.all(processImages(allCanvases)).then(results => {
         results.forEach(function (result, index) {
             console.log('ML5 Result ' + index + ':', result);
             if (result === 'Advertisement' || result === 'Promoted') adContainers.push(containers[index]);
         });
+        var tM1 = performance.now();
+        console.log("ML5 finished in " + (tM1 - tM0).toFixed(2) + " ms.");
     });
 
     // not sure why Promise.all doesn't work for ml5, but this does what we want
@@ -71,6 +77,9 @@ ML5.process = async function (containers) {
     // OK JS is the worst. Promise.all wasn't working then it just decided that it would work all of sudden after
     // I implement its replacement. Excellent
 
+    var t1 = performance.now();
+    console.log("Adclipse finished in " + (t1 - t0).toFixed(2) + " ms.");
+
     // return the containers that ml5 thinks have ads
     return adContainers;
 
@@ -82,7 +91,6 @@ ML5.process = async function (containers) {
  * Takes in containers and uses html2canvas to convert them to canvases
  * Returns: html2canvas promises
  */
-
 function convertToCanvases(containers) {
     let promises = [];
     let options = {
@@ -104,11 +112,10 @@ function convertToCanvases(containers) {
  * Takes in canvases, converts them to image data, puts image data through Ml5
  * Returns: promises from the ml5 classifier
  */
-
 function processImages(canvases) {
     let promises = [];
 
-    canvases.forEach(function(canvas, index) {
+    canvases.forEach(function (canvas, index) {
         var img = new Image();
         img.crossOrigin = "anonymous";
         img.width = 224;
@@ -117,6 +124,5 @@ function processImages(canvases) {
         console.log(img.src);
         promises.push(classifier.classify(img));
     });
-
     return promises;
 }
