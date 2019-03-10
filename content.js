@@ -82,6 +82,24 @@ function updateBadge() {
  */
 
 async function evaluateContainers(method) {
+    let iteration = 0;
+    let nodeList = [];
+    //add mutation observer here
+    let options = {childList: true, subtree: true};
+    let observer = new MutationObserver((mutations) => {
+        iteration++;
+        nodeList.forEach((node) => {
+            mutations.forEach((mutation) => {
+                if(mutation.target===node.target){
+                    let delta = node.lastCount - node.target.childNodes.length;
+                    node.avg = delta/iteration + node.avg*(iteration-1)/iteration;
+                    //reshuffle the node - weigh them based on the deltas
+                }
+            })
+        })
+    })
+    observer.observe(document.body, config);
+    //
     let containers = selectContainers();
     if (method === 'ocr') {
         let ads = await OCR.process(containers);
@@ -165,27 +183,16 @@ function selectContainers() {
 
     // return document.querySelectorAll(".ii4q9d-0, .rpBJOHq2PR60pnwJlUyP0 > div");
     // //get main content
-    // let mainCont = document.getElementsByClassName("rpBJOHq2PR60pnwJlUyP0 s1rcgrht-0 eEVuIz");
-    // console.log(mainCont);
-    // Array.from(mainCont).forEach((el) => {
-    //     console.log(countChildren(el, 1));
-    // })
-    // let containers = selectAllByChildren(document, 1, true);
-    // let co = Array.from(document.getElementsByTagName("*"));
-    // let c = [];
-    // containers.forEach((container) => {
-    //     c.push(container.node);
-    // })
-    // let cont = selectByChildren(document.body);
-    // console.log(containers);
-    // console.log(c[0]);
-    document.addEventListener("DOMContentLoaded", () => {
-        let mainCont = document.getElementsByClassName("rpBJOHq2PR60pnwJlUyP0 s1rcgrht-0 eEVuIz");
+    let options = {childList: true, subtree: true};
+    let observer = new MutationObserver((mutations) => {
+
+    })
+    let mainCont = document.getElementsByClassName("rpBJOHq2PR60pnwJlUyP0 s1rcgrht-0 eEVuIz");
     console.log(mainCont);
     Array.from(mainCont).forEach((el) => {
         console.log(countChildren(el, 1));
     })
-    let containers = selectAllByChildren(document, 1, true);
+    containers = selectAllByChildren(document, 1, true);
     let co = Array.from(document.getElementsByTagName("*"));
     let c = [];
     containers.forEach((container) => {
@@ -194,9 +201,11 @@ function selectContainers() {
     let cont = selectByChildren(document.body);
     console.log(containers);
     console.log(c[0]);
-    });
+    
     return [];
 }
+
+let containers = [];
 
 //returns a node list of elements
 let getContainers = () => {
