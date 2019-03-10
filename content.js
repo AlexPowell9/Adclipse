@@ -87,8 +87,8 @@ let nodeList = [];
  */
 
 async function evaluateContainers(method) {
+    await ML5.init();
     let iteration = 0;
-    
     //add mutation observer here
     let options = {childList: true, subtree: true};
     let observer = new MutationObserver((mutations) => {
@@ -102,9 +102,11 @@ async function evaluateContainers(method) {
                     
                     //send to container select
                     ML5.process(mutation.addedNodes).then((ads) => {
-                        highlightAds(ads);
-                        adsBlocked = ads.length;
-                        updateBadge();
+                        if(ads){
+                            highlightAds(ads);
+                            adsBlocked = ads.length;
+                            updateBadge();
+                        }
                     });
                 }
             })

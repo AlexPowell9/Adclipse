@@ -38,13 +38,27 @@ function ml5Initialize() {
     });
 }
 
+ML5.init = async () => {
+    if(!classifier)await ml5Initialize();
+    return ;
+}
+
+ML5.processSingle = async function(container) {
+    return await convertToCanvas(container).then((canvas) => {
+        return processImages(canvas);
+    }).then(result => {
+        if (result === 'Advertisement' || result === 'Promoted') return result;
+        else return null;
+    });
+}
+
 ML5.process = async function (containers) {
     var t0 = performance.now();
     await ml5Initialize();
     //print("Done loading ML5");
     var adContainers = [];
     var allCanvases = [];
-    var canvasPromises = convertToCanvases(containers);
+    var canvasPromises = convertToCanvas(containers);
 
     // wait for html2canvas to convert containers to canvases
     var tC0 = performance.now();
@@ -112,7 +126,6 @@ function convertToCanvases(containers) {
  * Returns: html2canvas promises
  */
 function convertToCanvas(container) {
-    let promises = [];
     let options = {
         logging: false,
         ignoreElements: function (element) {
@@ -120,10 +133,7 @@ function convertToCanvas(container) {
             return element.tagName.toLowerCase() == 'iframe';
         }
     };
-    containers.forEach(container => {
-        promises.push(html2canvas(container, options))
-    });
-    return promises;
+    return html2canvas(container, options);
 }
 
 /*
