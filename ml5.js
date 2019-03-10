@@ -106,6 +106,25 @@ function convertToCanvases(containers) {
     return promises;
 }
 
+/*
+ * Convert To Canvas
+ * Takes in containers and uses html2canvas to convert them to canvases
+ * Returns: html2canvas promises
+ */
+function convertToCanvas(container) {
+    let promises = [];
+    let options = {
+        logging: false,
+        ignoreElements: function (element) {
+            // return element.tagName.toLowerCase() == 'iframe' || element.tagName.toLowerCase() == 'img';
+            return element.tagName.toLowerCase() == 'iframe';
+        }
+    };
+    containers.forEach(container => {
+        promises.push(html2canvas(container, options))
+    });
+    return promises;
+}
 
 /*
  * ML5 Images

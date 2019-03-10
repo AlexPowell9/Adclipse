@@ -75,6 +75,11 @@ function updateBadge() {
     console.log("Ads on this page:", adsBlocked);
 }
 
+/**
+ * list of the nodes in the dom with additional information to sort them into ad likelyhood
+ */
+let nodeList = [];
+
 /*
  * Evaluate Containers
  * Gives containers to the selected detection module to decide if they are ads
@@ -83,7 +88,7 @@ function updateBadge() {
 
 async function evaluateContainers(method) {
     let iteration = 0;
-    let nodeList = [];
+    
     //add mutation observer here
     let options = {childList: true, subtree: true};
     let observer = new MutationObserver((mutations) => {
@@ -94,6 +99,13 @@ async function evaluateContainers(method) {
                     let delta = node.lastCount - node.target.childNodes.length;
                     node.avg = delta/iteration + node.avg*(iteration-1)/iteration;
                     //reshuffle the node - weigh them based on the deltas
+                    
+                    //send to container select
+                    ML5.process(mutation.addedNodes).then((ads) => {
+                        highlightAds(ads);
+                        adsBlocked = ads.length;
+                        updateBadge();
+                    });
                 }
             })
         })
