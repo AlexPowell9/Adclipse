@@ -60,9 +60,16 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
         // console.log("Called OCR");
         // evaluateContainers('ocr');
         evaluateContainers('ml5');
+       //window.addEventListener("scroll", runOnScroll);
+
     }
 
 });
+
+var runOnScroll =  function(evt) {
+    console.log("Scrolling!");
+    evaluateContainers('ml5');
+};
 
 var adsBlocked;
 
@@ -316,4 +323,3 @@ function extractRootDomain(url) {
     }
     return domain;
 }
-

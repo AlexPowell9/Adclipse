@@ -40,7 +40,9 @@ function ml5Initialize() {
 
 ML5.process = async function (containers) {
     var t0 = performance.now();
-    await ml5Initialize();
+    if (!classifier) {
+        await ml5Initialize();
+    }
     //print("Done loading ML5");
     var adContainers = [];
     var allCanvases = [];
@@ -48,11 +50,15 @@ ML5.process = async function (containers) {
 
     // wait for html2canvas to convert containers to canvases
     var tC0 = performance.now();
+    /*
+     * TODO: Asking for a screenshot, wait to return.
+     */
     await Promise.all(canvasPromises).then(canvases => {
+        //console.log(canvases);
         allCanvases = canvases;
-        console.log("converted all containers");
+        //console.log("converted all containers");
         var tC1 = performance.now();
-        console.log("HTML2Canvas finished in " + (tC1 - tC0).toFixed(2) + " ms.");
+        console.log("Screenshot Processing finished in " + (tC1 - tC0).toFixed(2) + " ms.");
     });
 
 
@@ -88,21 +94,57 @@ ML5.process = async function (containers) {
 
 /*
  * Convert To Canvas
- * Takes in containers and uses html2canvas to convert them to canvases
- * Returns: html2canvas promises
+ * Takes in containers and converts them to images, based on https://github.com/tlrobinson/element-capture 
+ * 
+ * SORTING HAT HACK WARNING! I dont bother sending elements that are outside of the screen area, so I pass a null instead. I do it this way because I didnt want to redo our whole architecture. 
+ * 
+ * Returns: promises
  */
 function convertToCanvases(containers) {
     let promises = [];
-    let options = {
-        logging: false,
-        ignoreElements: function (element) {
-            // return element.tagName.toLowerCase() == 'iframe' || element.tagName.toLowerCase() == 'img';
-            return element.tagName.toLowerCase() == 'iframe';
-        }
-    };
     containers.forEach(container => {
-        promises.push(html2canvas(container, options))
+        //Define dimensions for position on page
+        let dimensions = {};
+        dimensions.top = -window.scrollY;
+        dimensions.left = -window.scrollX;
+        let element = container;
+        //Get the top left coordinates by iterating through many parents.
+        try {
+            while (element !== document.body) {
+                dimensions.top += element.offsetTop;
+                dimensions.left += element.offsetLeft;
+                element = element.offsetParent;
+            }
+        } catch (err) {
+            //Sorting hat hack. See description for more details.
+            promises.push(null);
+            return;
+        }
+        // while (element !== document.body) {
+        //     dimensions.top += element.offsetTop;
+        //     dimensions.left += element.offsetLeft;
+        //     element = element.offsetParent;
+        // }
+        dimensions.width = container.offsetWidth;
+        dimensions.height = container.offsetHeight;
+        // console.log(dimensions);
+        // console.log("Width", window.innerWidth);
+        // console.log("Height", window.innerHeight);
+        if (dimensions.top > window.innerHeight) {
+            //Sorting hat hack. See description for more details.
+            promises.push(null);
+            return;
+        } else if (dimensions.left > window.innerWidth) {
+            //Sorting hat hack. See description for more details.
+            promises.push(null);
+            return;
+        }
+        promises.push(send({
+            dimensions: dimensions
+        }));
     });
+    // containers = newContainers;
+    console.log("Sending ", promises.length);
     return promises;
 }
 
@@ -114,15 +156,39 @@ function convertToCanvases(containers) {
  */
 function processImages(canvases) {
     let promises = [];
-
+    //console.log("Process");
     canvases.forEach(function (canvas, index) {
+        //This is to support the crappy null hack I did.
+        if (canvas == null) {
+            promises.push(null);
+            return;
+        }
         var img = new Image();
         img.crossOrigin = "anonymous";
         img.width = 224;
         img.height = 224;
-        img.src = canvas.toDataURL();
-        console.log(img.src);
+        // //This is for debugging the images we are putting through ml5.
+        // img.onload = () => {
+        //     console.log("Called?");
+        //     var w = window.open("");
+        //     w.document.write(img.outerHTML);
+        // }
+        img.src = canvas.response;
         promises.push(classifier.classify(img));
     });
     return promises;
+}
+
+/*
+ * This function handles passing the containers to to the backend for screenshot processing and handles response.
+ */
+function send(request) {
+    return new Promise(function (resolve, reject) {
+        chrome.extension.sendMessage(request, function (response) {
+            //console.log("Got Response!");
+            //console.log(response);
+            resolve(response);
+            //resolve(SlapNChop(request, response));
+        });
+    });
 }
