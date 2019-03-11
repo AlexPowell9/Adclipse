@@ -85,10 +85,11 @@ var runOnScroll = function (evt) {
         clearTimeout(timer);
     }
     timer = setTimeout(function () {
-        if ((scrollTop - lastPosition) >= window.innerHeight / 2 && scrollTop > lastPosition) {
-            evaluateContainers('ml5');
-            lastPosition = scrollTop;
-        }
+        // if ((scrollTop - lastPosition) >= window.innerHeight / 2 && scrollTop > lastPosition) {
+        //     evaluateContainers('ml5');
+        //     lastPosition = scrollTop;
+        // }
+        evaluateContainers('ml5');
     }, 150);
 };
 

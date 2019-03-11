@@ -140,10 +140,6 @@ function convertToCanvases(containers) {
         }
         dimensions.width = container.offsetWidth;
         dimensions.height = container.offsetHeight;
-        if (dimensions.height < 75) {
-            promises.push(null);
-            return;
-        }
         // console.log(dimensions);
         // console.log("Width", window.innerWidth);
         // console.log("Height", window.innerHeight);
@@ -153,6 +149,9 @@ function convertToCanvases(containers) {
             return;
         } else if (dimensions.left > window.innerWidth || dimensions.left < 0) {
             //Sorting hat hack. See description for more details.
+            promises.push(null);
+            return;
+        } else if (window.innerHeight - dimensions.top < dimensions.height / 1.5) {
             promises.push(null);
             return;
         }
