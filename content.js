@@ -60,7 +60,18 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
         // console.log("Called OCR");
         // evaluateContainers('ocr');
         evaluateContainers('ml5');
+        //Run ML5 on scroll
         window.addEventListener("scroll", runOnScroll);
+
+        function KeyPress(e) {
+            var evtobj = window.event ? event : e
+            if (evtobj.keyCode == 82 && evtobj.altKey) {
+                console.log("Alt + R");
+                evaluateContainers('ml5');
+            }
+        }
+        document.onkeydown = KeyPress;
+
 
     }
 
@@ -170,7 +181,7 @@ function highlightAds(containers) {
  * TODO: make this way better
  */
 function selectContainers() {
-    // return document.querySelectorAll("[data-google-query-id]");
+    //return document.querySelectorAll("[data-google-query-id]");
 
     // reddit posts
     // return document.querySelectorAll("._1poyrkZ7g36PawDueRza-J > article");

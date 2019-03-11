@@ -64,7 +64,7 @@ ML5.process = async function (containers) {
     var canvasPromises = convertToCanvases(containers);
 
 
-    // wait for html2canvas to convert containers to canvases
+    // wait for screen cropping to convert containers to canvases
     var tC0 = performance.now();
     await Promise.all(canvasPromises).then(canvases => {
         //console.log(canvases);
@@ -79,7 +79,7 @@ ML5.process = async function (containers) {
     var tM0 = performance.now();
     await Promise.all(processImages(allCanvases)).then(results => {
         results.forEach(function (result, index) {
-            console.log('ML5 Result ' + index + ':', result);
+            //console.log('ML5 Result ' + index + ':', result);
             if (result === 'Advertisement' || result === 'Promoted') adContainers.push(containers[index]);
         });
         var tM1 = performance.now();
@@ -140,6 +140,10 @@ function convertToCanvases(containers) {
         }
         dimensions.width = container.offsetWidth;
         dimensions.height = container.offsetHeight;
+        if (dimensions.height < 75) {
+            promises.push(null);
+            return;
+        }
         // console.log(dimensions);
         // console.log("Width", window.innerWidth);
         // console.log("Height", window.innerHeight);
@@ -177,11 +181,11 @@ function processImages(canvases) {
         img.width = 224;
         img.height = 224;
         //This is for debugging the images we are putting through ml5.
-        img.onload = () => {
-            console.log("Called?");
-            var w = window.open("");
-            w.document.write(img.outerHTML);
-        }
+        // img.onload = () => {
+        //     console.log("Called?");
+        //     var w = window.open("");
+        //     w.document.write(img.outerHTML);
+        // }
         img.src = canvas;
         promises.push(classifier.classify(img));
     });
@@ -228,11 +232,6 @@ function prepareImage(dimensions) {
             );
             var croppedDataUrl = canvas.toDataURL("image/png");
             resolve(croppedDataUrl);
-            // //This is for viewing the trimmed areas in new tabs
-            // chrome.tabs.create({
-            //   url: croppedDataUrl,
-            //   windowId: tab.windowId
-            // });
         }
         image.src = dataUrl;
         //console.log(canvas.toDataURL("image/png"));
