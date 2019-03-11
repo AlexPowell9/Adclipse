@@ -60,9 +60,26 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
         // console.log("Called OCR");
         // evaluateContainers('ocr');
         evaluateContainers('ml5');
+        window.addEventListener("scroll", runOnScroll);
+
     }
 
 });
+
+var lastPosition = 0;
+var timer = null;
+var runOnScroll = function (evt) {
+    var scrollTop = window.pageYOffset;
+    if (timer !== null) {
+        clearTimeout(timer);
+    }
+    timer = setTimeout(function () {
+        if ((scrollTop - lastPosition) >= window.innerHeight / 2 && scrollTop > lastPosition) {
+            evaluateContainers('ml5');
+            lastPosition = scrollTop;
+        }
+    }, 150);
+};
 
 var adsBlocked;
 
@@ -130,6 +147,7 @@ async function evaluateContainers(method) {
 
 function highlightAds(containers) {
     containers.forEach(container => {
+        container.classList.add("adclipseIdentified");
         if (visualStorageCopy.grayscale.active) {
             if (!container.classList["adclipseGrayscale"]) {
                 container.classList.add("adclipseGrayscale");

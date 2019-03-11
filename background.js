@@ -68,11 +68,20 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       });
     }
   }
-  //Deal with icon messages
-  if (message.classifyImage !== null) {
-    sendResponse({
-      response: "huh?"
+  //Deal with 
+  if (message.getTabScreenshot !== null && message.getTabScreenshot !== undefined) {
+    //console.log("Called Capture!", message.dimensions);
+    capture(sender.tab.id, message.dimensions).then((data) => {
+      //Respond with data url of the screenshot
+      sendResponse({
+        response: data
+      });
+    }).catch((err) => {
+      console.log("Error: ", err);
     });
+
+    //Need to return true to keep message channel open while promises resolve
+    return true;
   }
 });
 
@@ -102,4 +111,16 @@ function setIcon(iconDisabled) {
       console.log("done");
     });
   }
+}
+
+
+function capture(tabId, dimensions) {
+  console.log("Capture got called", dimensions);
+  return new Promise((resolve, reject) => {
+    chrome.tabs.get(tabId, (tab) => {
+      chrome.tabs.captureVisibleTab(tab.windowId, function (dataUrl) {
+        resolve(dataUrl);
+      });
+    });
+  });
 }
