@@ -11,6 +11,7 @@ var currentTab = location.href;
 var whitelisted = false;
 //This is the label we use if the label option is applied. We update this to be the same as storage.
 var adclipseLabel = "Adclipse";
+var adsBlocked = 0;
 
 /*
  * Get Visual Options from storage and apply them.
@@ -144,7 +145,18 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
         // console.log("Called OCR");
         // evaluateContainers('ocr');
         evaluateContainers('ml5');
+        //Run ML5 on scroll
         window.addEventListener("scroll", runOnScroll);
+
+        function KeyPress(e) {
+            var evtobj = window.event ? event : e
+            if (evtobj.keyCode == 82 && evtobj.altKey) {
+                console.log("Alt + R");
+                evaluateContainers('ml5');
+            }
+        }
+        document.onkeydown = KeyPress;
+
 
     }
 
@@ -158,19 +170,23 @@ var runOnScroll = function (evt) {
         clearTimeout(timer);
     }
     timer = setTimeout(function () {
-        if ((scrollTop - lastPosition) >= window.innerHeight / 2 && scrollTop > lastPosition) {
-            evaluateContainers('ml5');
-            lastPosition = scrollTop;
-        }
+        // if ((scrollTop - lastPosition) >= window.innerHeight / 2 && scrollTop > lastPosition) {
+        //     evaluateContainers('ml5');
+        //     lastPosition = scrollTop;
+        // }
+        evaluateContainers('ml5');
     }, 150);
 };
 
+<<<<<<< HEAD
 function nodeMetric(node) {
     return node.avg * 8 + node.lastCount * 2;
 }
 
 var adsBlocked;
 
+=======
+>>>>>>> origin/ml5Content
 /*
  * We set the badge here using the adsBlocked number
  */
@@ -196,12 +212,13 @@ async function evaluateContainers(method) {
     if (method === 'ocr') {
         let ads = await OCR.process(containers);
         highlightAds(ads);
-        adsBlocked = ads.length;
+        adsBlocked += ads.length;
         updateBadge();
     } else if (method === 'ml5') {
         let ads = await ML5.process(containers);
         highlightAds(ads);
-        adsBlocked = ads.length;
+        console.log("Ads length: ", ads.length);
+        adsBlocked += ads.length;
         updateBadge();
     }
 }
@@ -212,6 +229,11 @@ function highlightAds(containers) {
         if (visualStorageCopy.grayscale.active) {
             if (!container.classList["adclipseGrayscale"]) {
                 container.classList.add("adclipseGrayscale");
+            }
+        }
+        if (visualStorageCopy.remove.active) {
+            if (!container.classList["adclipseRemove"]) {
+                container.classList.add("adclipseRemove");
             }
         }
         if (visualStorageCopy.color.active) {
@@ -263,7 +285,7 @@ function highlightAds(containers) {
  * TODO: make this way better
  */
 function selectContainers() {
-    // return document.querySelectorAll("[data-google-query-id]");
+    //return document.querySelectorAll("[data-google-query-id]");
 
     // reddit posts
     // return document.querySelectorAll("._1poyrkZ7g36PawDueRza-J > article");

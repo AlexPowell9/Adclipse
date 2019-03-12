@@ -78,7 +78,7 @@ ML5.process = async function (containers) {
     var canvasPromises = convertToCanvas(containers);
 
 
-    // wait for html2canvas to convert containers to canvases
+    // wait for screen cropping to convert containers to canvases
     var tC0 = performance.now();
     await Promise.all(canvasPromises).then(canvases => {
         //console.log(canvases);
@@ -93,8 +93,11 @@ ML5.process = async function (containers) {
     var tM0 = performance.now();
     await Promise.all(processImages(allCanvases)).then(results => {
         results.forEach(function (result, index) {
-            console.log('ML5 Result ' + index + ':', result);
-            if (result === 'Advertisement' || result === 'Promoted') adContainers.push(containers[index]);
+            //console.log('ML5 Result ' + index + ':', result);
+            //if (result === 'Advertisement' || result === 'Promoted') adContainers.push(containers[index]);
+            if (result === 'GoogleAds' || result === 'Promoted' || result === 'RedditAds') {
+                adContainers.push(containers[index]);
+            }
         });
         var tM1 = performance.now();
         console.log("ML5 finished in " + (tM1 - tM0).toFixed(2) + " ms.");
@@ -154,6 +157,7 @@ function convertToCanvases(containers) {
         }
         dimensions.width = container.offsetWidth;
         dimensions.height = container.offsetHeight;
+        //if(dimensions.height*dimensions.width < (window.innerHeight*window.innerWidth)/700);
         // console.log(dimensions);
         // console.log("Width", window.innerWidth);
         // console.log("Height", window.innerHeight);
@@ -163,6 +167,9 @@ function convertToCanvases(containers) {
             return;
         } else if (dimensions.left > window.innerWidth || dimensions.left < 0) {
             //Sorting hat hack. See description for more details.
+            promises.push(null);
+            return;
+        } else if (window.innerHeight - dimensions.top < dimensions.height / 1.5) {
             promises.push(null);
             return;
         }
@@ -206,11 +213,11 @@ function processImages(canvases) {
         img.width = 224;
         img.height = 224;
         //This is for debugging the images we are putting through ml5.
-        img.onload = () => {
-            console.log("Called?");
-            var w = window.open("");
-            w.document.write(img.outerHTML);
-        }
+        // img.onload = () => {
+        //     console.log("Called?");
+        //     var w = window.open("");
+        //     w.document.write(img.outerHTML);
+        // }
         img.src = canvas;
         promises.push(classifier.classify(img));
     });
@@ -257,11 +264,6 @@ function prepareImage(dimensions) {
             );
             var croppedDataUrl = canvas.toDataURL("image/png");
             resolve(croppedDataUrl);
-            // //This is for viewing the trimmed areas in new tabs
-            // chrome.tabs.create({
-            //   url: croppedDataUrl,
-            //   windowId: tab.windowId
-            // });
         }
         image.src = dataUrl;
         //console.log(canvas.toDataURL("image/png"));
