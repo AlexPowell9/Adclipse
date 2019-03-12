@@ -133,6 +133,11 @@ function highlightAds(containers) {
                 container.classList.add("adclipseGrayscale");
             }
         }
+        if (visualStorageCopy.remove.active) {
+            if (!container.classList["adclipseRemove"]) {
+                container.classList.add("adclipseRemove");
+            }
+        }
         if (visualStorageCopy.color.active) {
             //This is ugly. We first remove all the color containers, and then add new ones.
             var divs = container.getElementsByClassName("adclipseColor");
