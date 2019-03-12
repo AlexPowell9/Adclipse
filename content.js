@@ -143,8 +143,8 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
          * TODO: pull from options to check which one is enabled.
          */
         // console.log("Called OCR");
-        // evaluateContainers('ocr');
-        evaluateContainers('ml5');
+        evaluateContainers('ocr');
+        // evaluateContainers('ml5');
         //Run ML5 on scroll
         window.addEventListener("scroll", runOnScroll);
 
@@ -152,7 +152,8 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
             var evtobj = window.event ? event : e
             if (evtobj.keyCode == 82 && evtobj.altKey) {
                 console.log("Alt + R");
-                evaluateContainers('ml5');
+                // evaluateContainers('ml5');
+                evaluateContainers('ocr');
             }
         }
         document.onkeydown = KeyPress;
@@ -174,7 +175,8 @@ var runOnScroll = function (evt) {
         //     evaluateContainers('ml5');
         //     lastPosition = scrollTop;
         // }
-        evaluateContainers('ml5');
+        // evaluateContainers('ml5');
+        evaluateContainers('ocr');
     }, 150);
 };
 
