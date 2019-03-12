@@ -292,7 +292,7 @@ function selectContainers() {
     // console.log(c[0]);
     let c = [];
     contentAreas.forEach((area) => {
-        c = c.concat(area.container.childNodes);
+        if(area.container)c = c.concat(area.container.childNodes);
     })
     return c;
 }
