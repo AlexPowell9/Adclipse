@@ -122,7 +122,7 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
                 if(area.metric(node) > area.metric(area.container))area.container = node;
             });
         });
-        
+
     })
     observer.observe(document.body, options);
     // Check if whitelisted
@@ -286,22 +286,25 @@ function selectContainers() {
 
     // return document.querySelectorAll(".ii4q9d-0, .rpBJOHq2PR60pnwJlUyP0 > div");
     // //get main content
-    let mainCont = document.getElementsByClassName("rpBJOHq2PR60pnwJlUyP0 s1rcgrht-0 eEVuIz");
-    console.log(mainCont);
-    Array.from(mainCont).forEach((el) => {
-        console.log(countChildren(el, 1));
-    })
-    containers = selectAllByChildren(document, 1, true);
-    let co = Array.from(document.getElementsByTagName("*"));
+    // let mainCont = document.getElementsByClassName("rpBJOHq2PR60pnwJlUyP0 s1rcgrht-0 eEVuIz");
+    // console.log(mainCont);
+    // Array.from(mainCont).forEach((el) => {
+    //     console.log(countChildren(el, 1));
+    // })
+    // containers = selectAllByChildren(document, 1, true);
+    // let co = Array.from(document.getElementsByTagName("*"));
+    // let c = [];
+    // containers.forEach((container) => {
+    //     c.push(container.node);
+    // })
+    // let cont = selectByChildren(document.body);
+    // console.log(containers);
+    // console.log(c[0]);
     let c = [];
-    containers.forEach((container) => {
-        c.push(container.node);
+    contentAreas.forEach((area) => {
+        c = c.concat(area.container.childNodes);
     })
-    let cont = selectByChildren(document.body);
-    console.log(containers);
-    console.log(c[0]);
-    
-    return [];
+    return c;
 }
 
 let containers = [];
