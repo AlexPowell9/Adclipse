@@ -182,7 +182,7 @@ function highlightAds(containers) {
  * TODO: make this way better
  */
 function selectContainers() {
-    //return document.querySelectorAll("[data-google-query-id]");
+    return document.querySelectorAll("[data-google-query-id]");
 
     // reddit posts
     // return document.querySelectorAll("._1poyrkZ7g36PawDueRza-J > article");
@@ -192,7 +192,7 @@ function selectContainers() {
 
     // posts and sidebar 
     // return document.querySelectorAll("._1poyrkZ7g36PawDueRza-J, .ii4q9d-0");
-    return document.querySelectorAll(".ii4q9d-0, .rpBJOHq2PR60pnwJlUyP0 > div");
+    //return document.querySelectorAll(".ii4q9d-0, .rpBJOHq2PR60pnwJlUyP0 > div");
 }
 
 
