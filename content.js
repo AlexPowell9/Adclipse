@@ -50,22 +50,42 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
     }
     var d = extractHostname(currentTab);
     // console.log(d);
-    let options = {attribute: true, childList: true, subtree: true};
+    containers = selectAllByChildren(document, 1, true);
+    containers.forEach((container) => {
+        nodeList.push({
+            target: container,
+            avg: container.childNodes.length,
+            iterations:0,
+            totalAdded: node.childNodes.length,
+            totalRemoved: 0,
+            srcChanges: 0
+        });
+    });
+    let options = {attribute: true, childList: true, subtree: true, attributeFilter: ["src"]};
     let observer = new MutationObserver((mutations) => {
-        iteration++;
         nodeList.forEach((node) => {
             mutations.forEach((mutation) => {
                 if(mutation.target===node.target){
-                    let delta = node.lastCount - node.target.childNodes.length;
-                    node.avg = delta/iteration + node.avg*(iteration-1)/iteration;
-                    //reshuffle the node - weigh them based on the deltas
+                    node.iterations++;
+                    let delta = mutation.addedNodes.length - mutation.removedNodes.length;
+                    node.avg = delta/node.iterations + node.avg*(node.iterations-1)/node.iterations;
+                    node.totalAdded += mutation.addedNodes.length;
+                    node.totalRemoved += mutation.removedNodes.length;
+                    
                     mutation.addedNodes.forEach((node) => {
                         nodeList.push({
                             target: node,
                             avg: node.childNodes.length,
-                            lastCount: node.childNodes.length
+                            totalAdded: node.childNodes.length,
+                            totalRemoved: 0,
+                            iterations: 0
                         });
-                    })
+                    });
+                    if(mutation.type === "attributes"){
+                        node.srcChanges++;
+                    }
+                    //reshuffle the node - weigh them based on the deltas
+
                     //send to container select
                     // ML5.process(mutation.addedNodes).then((ads) => {
                     //     if(ads){
@@ -77,8 +97,11 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
                 }
             })
         });
+        nodeList.sort((a, b) => {
+            return nodeMetric(a) - nodeMetric(b);
+        })
     })
-    observer.observe(document.body, config);
+    observer.observe(document.body, options);
     // Check if whitelisted
     if (storageCopy.indexOf(d) != -1) {
         // whitelisted
@@ -113,6 +136,27 @@ var runOnScroll = function (evt) {
         }
     }, 150);
 };
+
+/**
+ * This function will find the index of the value so that it can be inserted into the correct location
+ */
+function sortedIndex(array, value) {
+    var low = 0,
+        high = array.length;
+
+    while (low < high) {
+        var mid = (low + high) >>> 1;
+        if (array[mid] < value) low = mid + 1;
+        else high = mid;
+    }
+    return low;
+}
+
+function nodeMetric(node) {
+    return node.avg * 8 + node.lastCount * 2;
+
+
+}
 
 var adsBlocked;
 
