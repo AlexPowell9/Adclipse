@@ -143,6 +143,7 @@ function convertToCanvases(containers) {
         }
         dimensions.width = container.offsetWidth;
         dimensions.height = container.offsetHeight;
+        //if(dimensions.height*dimensions.width < (window.innerHeight*window.innerWidth)/700);
         // console.log(dimensions);
         // console.log("Width", window.innerWidth);
         // console.log("Height", window.innerHeight);
