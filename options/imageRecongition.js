@@ -71,17 +71,14 @@ function modelInitialize() {
 function loadModel() {
     modelUpdateStatus("Loading knnClassifier...");
     knnClassifier = ml5.KNNClassifier();
-    //regressor = featureExtractor.regression();
     modelUpdateStatus("Loading Model...");
     var t0 = performance.now();
-    // regressor.load("./external/ml5/model.json", () => {
     knnClassifier.load("./external/ml5/adclipseKNN.json", () => {
         var t1 = performance.now();
         modelUpdateStatus("Model Loaded in " + (t1 - t0).toFixed(2) + " ms.");
 
         //Gets all labels from knnClassifier and displays
         updateLabelList();
-
 
         modelLoading = false;
     });
@@ -97,7 +94,6 @@ function newModel() {
         featureExtractor.numClasses = 20;
         modelUpdateStatus("Loading knnClassifier...");
         knnClassifier = ml5.KNNClassifier();
-        //regressor = featureExtractor.regression();
         modelUpdateStatus("Clean Model Loaded!");
         modelLoading = false;
     });
@@ -182,7 +178,6 @@ function vPredictImages() {
     let features = featureExtractor.infer(uploadedImage);
     // Get the total number of labels from knnClassifier
 
-    //regressor.predict(uploadedImage, function (err, results) {
     knnClassifier.classify(features, function (err, results) {
         if (err) {
             vResult.innerHTML = err;
@@ -215,6 +210,7 @@ function vPredictImages() {
  * http://jsfiddle.net/n98rqhaL/
  */
 tFileUploader.oninput = function () {
+    tResult.innerHTML = "Waiting...";
     var files = event.target.files; //FileList object
     var output = tFileResults;
     //Reset results area
@@ -231,7 +227,6 @@ tFileUploader.oninput = function () {
             var div = document.createElement("div");
             div.innerHTML = "<img crossOrigin width='224' height='224' class='thumbnail' src='" + picFile.result + "'/>";
             output.insertBefore(div, null);
-            //knnClassifier.addExample(div.childNodes[0], 'Other');
         });
         //Read the image
         picReader.readAsDataURL(file);
@@ -296,7 +291,6 @@ async function trainModel() {
     tResult.innerHTML = "Loading Images...";
     await loadTrainingImages(tPictureLabel.value);
     tResult.innerHTML = "Training Complete!";
-    // });
 }
 
 /*

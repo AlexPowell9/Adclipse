@@ -15,19 +15,20 @@
     "web_accessible_resources": [
         "external/ml5/model.json",
         "external/ml5/Screenshot_19.png",
-        "external/ml5/model.weights.bin"
+        "external/ml5/model.weights.bin",
+        "external/ml5/adclipseKNN.json"
     ],
     "content_scripts": [{
         "matches": ["http://*/*",
             "https://*/*"],
-        "js": ["external/ml5/ml5@0.2.1.min.js", "content.js", "ocr.js", "ml5.js", "html2canvas.min.js", "tesseract.min.js"],
+        "js": ["external/ml5/ml5.min.js", "content.js", "ocr.js", "ml5.js", "html2canvas.min.js", "tesseract.min.js"],
         "css": ["content.css"],
         "run_at": "document_end",
         "all_frames": false,
         "match_about_blank": true
     }],
     "background": {
-        "scripts": ["external/ml5/ml5@0.2.1.min.js", "background.js"],
+        "scripts": ["background.js"],
         "persistent": false
     },
     "icons": {

@@ -6,11 +6,11 @@
 
 let ML5 = {};
 var adsFound = 0;
-var features;
-var classifier;
+var featureExtractor;
+var knnClassifier;
 
 /*
- * Function to configure feature extractor, classifier, and load ml5 model. We set status and timing before and after to indicate completion.
+ * Function to configure feature extractor, knnClassifier, and load ml5 model. We set status and timing before and after to indicate completion.
  *
  * How to time a JS function: https://stackoverflow.com/questions/313893/how-to-measure-time-taken-by-a-function-to-execute
  * How to load models using ml5 >=0.1.3: https://codepen.io/kotobuki/pen/yRzGZL?editors=0011
@@ -18,18 +18,18 @@ var classifier;
 function ml5Initialize() {
     return new Promise(function (resolve, reject) {
         console.log("Loading Feature Extractor...");
-        features = ml5.featureExtractor('MobileNet', () => {
+        featureExtractor = ml5.featureExtractor('MobileNet', () => {
             /*
              * This is a weird thing that may or may not have been fixed in new version. With more than 2 classes it was refusing to pick up more classes.
              * https://github.com/ml5js/ml5-library/issues/164
              */
-            features.numClasses = 3;
-            console.log("Loading Classifier...");
-            classifier = features.classification();
+            featureExtractor.numClasses = 20;
+            console.log("Loading KNNClassifier...");
+            knnClassifier = ml5.KNNClassifier();
             console.log("Loading Model...");
             var t0 = performance.now();
             //https://developer.chrome.com/extensions/content_scripts
-            classifier.load(chrome.runtime.getURL("external/ml5/model.json"), () => {
+            knnClassifier.load(chrome.runtime.getURL("external/ml5/adclipseKNN.json"), () => {
                 var t1 = performance.now();
                 console.log("Model Loaded in " + (t1 - t0).toFixed(2) + " ms.");
                 resolve("Done init ML5");
@@ -46,7 +46,7 @@ var dataUrl = null;
  */
 ML5.process = async function (containers) {
     var t0 = performance.now();
-    if (!classifier) {
+    if (!knnClassifier) {
         await ml5Initialize();
     }
 
@@ -79,8 +79,13 @@ ML5.process = async function (containers) {
     var tM0 = performance.now();
     await Promise.all(processImages(allCanvases)).then(results => {
         results.forEach(function (result, index) {
-            //console.log('ML5 Result ' + index + ':', result);
-            if (result === 'Advertisement' || result === 'Promoted') adContainers.push(containers[index]);
+            console.log('ML5 Result ' + index + ':', result);
+            if (result && result.confidencesByLabel[result.label] < 1) {
+                return;
+            }
+            if (result && (result.label === 'Advertisement' || result.label === 'Promoted')) {
+                adContainers.push(containers[index]);
+            }
         });
         var tM1 = performance.now();
         console.log("ML5 finished in " + (tM1 - tM0).toFixed(2) + " ms.");
@@ -164,30 +169,44 @@ function convertToCanvases(containers) {
 /*
  * ML5 Images
  * Takes in canvases, converts them to image data, puts image data through Ml5
- * Returns: promises from the ml5 classifier
+ * Returns: promises from the ml5 knnClassifier
  */
 function processImages(canvases) {
     let promises = [];
     //console.log("Process");
-    canvases.forEach(function (canvas, index) {
+    console.log("Canvases: ", canvases.length);
+    //canvases.forEach(function (canvas, index) {
+    for (let i = 0; i < canvases.length; i++) {
+
+        let canvas1 = canvases[i];
+
         //This is to support the crappy null hack I did.
-        if (canvas == null) {
+        if (canvas1 == null) {
             promises.push(null);
-            return;
+            continue;
         }
         var img = new Image();
         img.crossOrigin = "anonymous";
         img.width = 224;
         img.height = 224;
+        let features;
         //This is for debugging the images we are putting through ml5.
-        // img.onload = () => {
+        // img.onload = function () {
         //     console.log("Called?");
-        //     var w = window.open("");
-        //     w.document.write(img.outerHTML);
+        //     // var w = window.open("");
+        //     // w.document.write(img.outerHTML);
+        //     features = featureExtractor.infer(img);
+        //     console.log("Features: ", features);
+        //     promises.push(knnClassifier.classify(features));
         // }
-        img.src = canvas;
-        promises.push(classifier.classify(img));
-    });
+        img.src = canvas1;
+        console.log("Img: ", img);
+        features = featureExtractor.infer(img);
+
+        promises.push(knnClassifier.classify(features));
+    }
+    // });
+    console.log("It is too late scooby doo!");
     return promises;
 }
 
