@@ -165,21 +165,6 @@ var runOnScroll = function (evt) {
     }, 150);
 };
 
-/**
- * This function will find the index of the value so that it can be inserted into the correct location
- */
-function sortedIndex(array, value) {
-    var low = 0,
-        high = array.length;
-
-    while (low < high) {
-        var mid = (low + high) >>> 1;
-        if (array[mid] < value) low = mid + 1;
-        else high = mid;
-    }
-    return low;
-}
-
 function nodeMetric(node) {
     return node.avg * 8 + node.lastCount * 2;
 }
