@@ -44,15 +44,17 @@ let nodeList = [];
 let contentAreas = [
     {//sidebar
         container: {},
-        metric: () => {
+        metric: (node) => {
             return node.srcChanges;
         }
     },
     {//main content
-        container: {},
+        container: null,
         metric: (node) => {
-            let position = node.target.getBoundingClientRect();
-            return node.totalAdded / (position.width * position.height);
+            let position = node.target&&node.target.getBoundingClientRect?node.target.getBoundingClientRect():{width:0, height:0};
+            let area = (position.width * position.height);
+            //return (area? 0: node.totalAdded / area);
+            return (node?node.totalAdded:0);
         }
     }
 ]
@@ -72,19 +74,21 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
     containers = selectAllByChildren(document, 1, true);
     containers.forEach((container) => {
         nodeList.push({
-            target: container,
-            avg: container.childNodes.length,
+            target: container.node,
+            avg: (container.childNodes?node.container.length:0),
             iterations:0,
-            totalAdded: node.childNodes.length,
+            totalAdded: (container.childNodes?node.container.length:0),
             totalRemoved: 0,
             srcChanges: 0,
         });
     });
     let options = {attribute: true, childList: true, subtree: true, attributeFilter: ["src"]};
     let observer = new MutationObserver((mutations) => {
+        console.log("main content", contentAreas[1].container);
         nodeList.forEach((node) => {
             mutations.forEach((mutation) => {
                 if(mutation.target===node.target){
+                    console.log(node, mutation);
                     node.iterations++;
                     let delta = mutation.addedNodes.length - mutation.removedNodes.length;
                     node.avg = delta/node.iterations + node.avg*(node.iterations-1)/node.iterations;
@@ -92,10 +96,11 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
                     node.totalRemoved += mutation.removedNodes.length;
                     
                     mutation.addedNodes.forEach((node) => {
+                        console.log(node);
                         nodeList.push({
                             target: node,
-                            avg: node.childNodes.length,
-                            totalAdded: node.childNodes.length,
+                            avg: (node.childNodes?node.childNodes.length:0),
+                            totalAdded: (node.childNodes?node.childNodes.length:0),
                             totalRemoved: 0,
                             iterations: 0
                         });
