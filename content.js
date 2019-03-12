@@ -55,7 +55,7 @@ let contentAreas = [
             let position = node.target&&node.target.getBoundingClientRect?node.target.getBoundingClientRect():{width:0, height:0};
             let area = (position.width * position.height);
             //return (area? 0: node.totalAdded / area);
-            return (node?node.totalAdded:0);
+            return node.totalAdded||0;
         }
     }
 ]
@@ -85,11 +85,9 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
     });
     let options = {attribute: true, childList: true, subtree: true, attributeFilter: ["src"]};
     let observer = new MutationObserver((mutations) => {
-        console.log("main content", contentAreas[1].container);
         nodeList.forEach((node) => {
             mutations.forEach((mutation) => {
                 if(mutation.target===node.target){
-                    console.log(node, mutation);
                     node.iterations++;
                     let delta = mutation.addedNodes.length - mutation.removedNodes.length;
                     node.avg = delta/node.iterations + node.avg*(node.iterations-1)/node.iterations;
@@ -97,7 +95,6 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
                     node.totalRemoved += mutation.removedNodes.length;
                     
                     mutation.addedNodes.forEach((node) => {
-                        console.log(node);
                         nodeList.push({
                             target: node,
                             avg: (node.childNodes?node.childNodes.length:0),
@@ -123,9 +120,12 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
             })
         });
         contentAreas.forEach((area) => {
-            if(!area.container)area.container = nodeList[0] || {};
+            if(!area.container)area.container = nodeList[0];
             nodeList.forEach((node) => {
-                if(area.metric(node) > area.metric(area.container))area.container = node;
+                //console.log("current metric: ", area.metric(area.container));
+                if(area.metric(node) > area.metric(area.container)){
+                    area.container = node;
+                }        
             });
         });
 
@@ -311,8 +311,11 @@ function selectContainers() {
     // console.log(c[0]);
     let c = [];
     contentAreas.forEach((area) => {
-        if(area.container)c = c.concat(area.container.childNodes);
+        console.log(area);
+        console.log(area.container);
+        if(area.container && area.container.target && area.container.target.childNodes)c = c.concat(Array.from(area.container.target.childNodes));
     })
+    console.log(c);
     return c;
 }
 

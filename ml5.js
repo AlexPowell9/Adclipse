@@ -75,7 +75,7 @@ ML5.process = async function (containers) {
     //print("Done loading ML5");
     var adContainers = [];
     var allCanvases = [];
-    var canvasPromises = convertToCanvas(containers);
+    var canvasPromises = convertToCanvases(containers);
 
 
     // wait for screen cropping to convert containers to canvases
