@@ -178,15 +178,12 @@ var runOnScroll = function (evt) {
     }, 150);
 };
 
-<<<<<<< HEAD
 function nodeMetric(node) {
     return node.avg * 8 + node.lastCount * 2;
 }
 
 var adsBlocked;
 
-=======
->>>>>>> origin/ml5Content
 /*
  * We set the badge here using the adsBlocked number
  */
