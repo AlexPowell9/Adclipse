@@ -11,7 +11,7 @@
   <script src="external/codeMirror/lib/codemirror.js"></script>
   <link rel="stylesheet" href="external/codeMirror/lib/codemirror.css">
   <!--The below are for ml5.js -->
-  <script src="external/ml5/ml5@0.2.1.min.js"></script>
+  <script src="external/ml5/ml5.min.js"></script>
   <!--The below are for the extension-->
   <link href="options.css" rel="stylesheet">
   <link href="content.css" rel="stylesheet">
@@ -189,7 +189,7 @@
         <div class="IRSection">
           <div class="text-center">
             <div class="breathingRoom">
-                <label>Select Single Image File: </label><input type="file" accept="image/*" id="vFileUploader">
+              <label>Select Single Image File: </label><input type="file" accept="image/*" id="vFileUploader">
             </div>
             <img crossOrigin id="uploadedImage" width="224" height="224">
           </div>
@@ -200,6 +200,7 @@
             <strong>Result: </strong><span id='vResult'>Waiting...</span>
           </div>
         </div>
+
         <!--Training-->
         <h3>Train</h3>
         <div class="IRSection">
@@ -219,7 +220,7 @@
             <button class="IRButton" id="saveButton">Save</button>
           </div>
           <div>
-            <strong>Result: </strong><span id='tResult'>Waiting...</span>
+            <strong>Status: </strong><span id='tResult'>Waiting...</span>
           </div>
         </div>
       </div>

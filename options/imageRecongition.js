@@ -1,8 +1,12 @@
 /*
  *
  * SUMMARY: This file keeps all of the option javascript for the image recognition tab. 
+ * 
+ * 
+ * TODO: Add clearing capability for specific and all classes. https://ml5js.org/docs/KNNClassifier
  *
  */
+
 
 /*
  * Get all the elements we'll need for later.
@@ -29,8 +33,8 @@ const tResult = document.getElementById('tResult');
 /*
  * ml5.js global definitions. These are initialized in vInitialize().
  */
-let features;
-let classifier;
+let featureExtractor;
+let knnClassifier;
 //let regressor
 
 
@@ -45,19 +49,19 @@ modelInitialize();
 
 
 /*
- * Function to configure feature extractor, classifier, and load ml5 model. We set status and timing before and after to indicate completion.
+ * Functions to configure feature extractor, knnClassifier, and load ml5 model. We set status and timing before and after to indicate completion.
  * 
  * How to time a JS function: https://stackoverflow.com/questions/313893/how-to-measure-time-taken-by-a-function-to-execute
  * How to load models using ml5 >=0.1.3: https://codepen.io/kotobuki/pen/yRzGZL?editors=0011
  */
 function modelInitialize() {
     modelUpdateStatus("Loading Feature Extractor...");
-    features = ml5.featureExtractor('MobileNet', () => {
+    featureExtractor = ml5.featureExtractor('MobileNet', () => {
         /*
          * This is a weird thing that may or may not have been fixed in new version. With more than 2 classes it was refusing to pick up more classes.
          * https://github.com/ml5js/ml5-library/issues/164
          */
-        features.numClasses = 20;
+        featureExtractor.numClasses = 20;
 
         //Default to loading custom model.
         loadModel();
@@ -65,34 +69,22 @@ function modelInitialize() {
 }
 //Load Model
 function loadModel() {
-    modelUpdateStatus("Loading Classifier...");
-    classifier = features.classification();
-    //regressor = features.regression();
+    modelUpdateStatus("Loading knnClassifier...");
+    knnClassifier = ml5.KNNClassifier();
+    //regressor = featureExtractor.regression();
     modelUpdateStatus("Loading Model...");
     var t0 = performance.now();
-    //regressor.load("./external/ml5/model.json", () => {
-    classifier.load("./external/ml5/model.json", () => {
+    // regressor.load("./external/ml5/model.json", () => {
+    knnClassifier.load("./external/ml5/adclipseKNN.json", () => {
         var t1 = performance.now();
         modelUpdateStatus("Model Loaded in " + (t1 - t0).toFixed(2) + " ms.");
+
+        //Gets all labels from knnClassifier and displays
+        updateLabelList();
+
+
+        modelLoading = false;
     });
-    //usage:
-    readTextFile("./external/ml5/model.json", function (text) {
-        var data = JSON.parse(text);
-        /*
-         * Removes any unwanted nodes from previous calls.
-         * https://stackoverflow.com/questions/3955229/remove-all-child-elements-of-a-dom-node-in-javascript
-         */
-        while (modelLabels.firstChild) {
-            modelLabels.removeChild(modelLabels.firstChild);
-        }
-        //Gets labels and puts them in DOM.
-        data.ml5Specs.mapStringToIndex.forEach(value => {
-            var li = document.createElement("li");
-            li.innerHTML = value;
-            modelLabels.insertBefore(li, null);
-        });
-    });
-    modelLoading = false;
 }
 //New Model
 function newModel() {
@@ -101,11 +93,11 @@ function newModel() {
         modelLabels.removeChild(modelLabels.firstChild);
     }
     modelUpdateStatus("Loading Feature Extractor...");
-    features = ml5.featureExtractor('MobileNet', () => {
-        features.numClasses = 20;
-        modelUpdateStatus("Loading Classifier...");
-        classifier = features.classification();
-        //regressor = features.regression();
+    featureExtractor = ml5.featureExtractor('MobileNet', () => {
+        featureExtractor.numClasses = 20;
+        modelUpdateStatus("Loading knnClassifier...");
+        knnClassifier = ml5.KNNClassifier();
+        //regressor = featureExtractor.regression();
         modelUpdateStatus("Clean Model Loaded!");
         modelLoading = false;
     });
@@ -178,19 +170,33 @@ function vPredictButtonDisabled(disabled) {
  * Predict image(s).
  */
 function vPredictImages() {
+    let numLabels = knnClassifier.getNumLabels();
     if (!uploadedImage.src) {
         vResult.innerHTML = "Error: No Image Uploaded!";
         return;
+    } else if (numLabels <= 0) {
+        vResult.innerHTML = "Error: There is no examples in any label!";
+        return;
     }
     var t0 = performance.now();
+    let features = featureExtractor.infer(uploadedImage);
+    // Get the total number of labels from knnClassifier
+
     //regressor.predict(uploadedImage, function (err, results) {
-    classifier.classify(uploadedImage, function (err, results) {
+    knnClassifier.classify(features, function (err, results) {
         if (err) {
             vResult.innerHTML = err;
         } else {
             console.log(results);
             var t1 = performance.now();
-            vResult.innerHTML = results + " in " + (t1 - t0).toFixed(2) + " ms.";
+            //Output final decision and confidences below
+            let resultString = results.label + " in " + (t1 - t0).toFixed(2) + " ms. <br><br><strong>Confidences:</strong><br>";
+            Object.entries(results.confidencesByLabel).forEach((entry, index) => {
+                resultString += entry[0] + ": " + entry[1].toFixed(2) + "<br>";
+                // let key = entry[0];
+                // let value = entry[1];
+            });
+            vResult.innerHTML = resultString;
         }
     });
 }
@@ -225,7 +231,7 @@ tFileUploader.oninput = function () {
             var div = document.createElement("div");
             div.innerHTML = "<img crossOrigin width='224' height='224' class='thumbnail' src='" + picFile.result + "'/>";
             output.insertBefore(div, null);
-            //classifier.addImage(div.childNodes[0], 'Other');
+            //knnClassifier.addExample(div.childNodes[0], 'Other');
         });
         //Read the image
         picReader.readAsDataURL(file);
@@ -236,28 +242,34 @@ tFileUploader.oninput = function () {
  * Load images into classfier.
  */
 async function loadTrainingImages(picLabel) {
-    updateLabelList(picLabel);
+    let features;
     for (var i = 0; i < tFileResults.childNodes.length; i++) {
-        await classifier.addImage(tFileResults.childNodes[i].childNodes[0], picLabel);
+        features = featureExtractor.infer(tFileResults.childNodes[i].childNodes[0]);
+        await knnClassifier.addExample(features, picLabel);
     }
+    updateLabelList();
 }
 
 /*
  * Update list of labels.
  */
-function updateLabelList(label) {
-    let exists = false;
-    for (var i = 0; i < modelLabels.childNodes.length; i++) {
-        if (label == modelLabels.childNodes[i].innerHTML) {
-            exists = true;
-            break;
-        }
+function updateLabelList() {
+    /*
+     * Removes any unwanted nodes from previous calls.
+     * https://stackoverflow.com/questions/3955229/remove-all-child-elements-of-a-dom-node-in-javascript
+     */
+    while (modelLabels.firstChild) {
+        modelLabels.removeChild(modelLabels.firstChild);
     }
-    if (!exists) {
+
+    //Gets labels and puts them in DOM.
+    Object.entries(knnClassifier.getCountByLabel()).forEach((entry, index) => {
         var li = document.createElement("li");
-        li.innerHTML = label;
+        li.innerHTML = entry[0] + ": " + entry[1];
         modelLabels.insertBefore(li, null);
-    }
+        // let key = entry[0];
+        // let value = entry[1];
+    });
 }
 
 
@@ -283,25 +295,15 @@ async function trainModel() {
     //Load images
     tResult.innerHTML = "Loading Images...";
     await loadTrainingImages(tPictureLabel.value);
-    //Train
-    classifier.train(function (lossValue) {
-        console.log(lossValue);
-        if (lossValue != null) {
-            tResult.innerHTML = 'Training: Loss is ' + lossValue;
-        } else {
-            tResult.innerHTML = "Training Complete!";
-        }
-
-    });
+    tResult.innerHTML = "Training Complete!";
+    // });
 }
 
 /*
  * Save button event.
  */
 saveButton.addEventListener("click", function () {
-    classifier.save(() => {
-        console.log("Saved!")
-    });
+    knnClassifier.save("adclipseKNN");
 });
 
 
