@@ -50,6 +50,10 @@ function getDefaults() {
         "color": "#000000",
         "opacity": 0.5
     };
+    //Remove
+    storage.remove = {
+        "active": false
+    };
     //Border
     storage.border = {
         "active": false,
@@ -175,6 +179,36 @@ function initializeCheckboxes() {
             colorChecked(false);
         }
         visualStorageCopy.color.active = this.checked;
+        updateVisualStorage();
+    });
+
+    /*
+     * Remove
+     */
+    checkbox = document.querySelector("input[name=remove]");
+    //Handle check states for remove
+    function removeChecked(checked) {
+        if (checked) {
+            element.classList.add("adclipseRemove");
+        } else {
+            element.classList.remove("adclipseRemove");
+        }
+    }
+    //Initialize Remove
+    if (visualStorageCopy.remove.active) {
+        checkbox.checked = true;
+        removeChecked(true);
+    }
+    //Add listener remove
+    checkbox.addEventListener('change', function () {
+        if (this.checked) {
+            // Checkbox is checked..
+            removeChecked(true);
+        } else {
+            // Checkbox is not checked..
+            removeChecked(false);
+        }
+        visualStorageCopy.remove.active = this.checked;
         updateVisualStorage();
     });
 

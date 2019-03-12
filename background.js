@@ -13,7 +13,6 @@ chrome.browserAction.setBadgeBackgroundColor({
   color: '#525252'
 });
 
-
 /*
  * This is what makes the tabs have unique badge numbers. 
  * https://stackoverflow.com/questions/32168449/how-can-i-get-different-badge-value-for-every-tab-on-chrome
@@ -69,6 +68,21 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       });
     }
   }
+  //Deal with 
+  if (message.getTabScreenshot !== null && message.getTabScreenshot !== undefined) {
+    //console.log("Called Capture!", message.dimensions);
+    capture(sender.tab.id, message.dimensions).then((data) => {
+      //Respond with data url of the screenshot
+      sendResponse({
+        response: data
+      });
+    }).catch((err) => {
+      console.log("Error: ", err);
+    });
+
+    //Need to return true to keep message channel open while promises resolve
+    return true;
+  }
 });
 
 
@@ -99,3 +113,14 @@ function setIcon(iconDisabled) {
   }
 }
 
+
+function capture(tabId, dimensions) {
+  console.log("Capture got called", dimensions);
+  return new Promise((resolve, reject) => {
+    chrome.tabs.get(tabId, (tab) => {
+      chrome.tabs.captureVisibleTab(tab.windowId, function (dataUrl) {
+        resolve(dataUrl);
+      });
+    });
+  });
+}

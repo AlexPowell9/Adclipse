@@ -11,6 +11,7 @@ var currentTab = location.href;
 var whitelisted = false;
 //This is the label we use if the label option is applied. We update this to be the same as storage.
 var adclipseLabel = "Adclipse";
+var adsBlocked = 0;
 
 /*
  * Get Visual Options from storage and apply them.
@@ -33,6 +34,32 @@ chrome.storage.local.get("visual", function (returnedStorage) {
     applyVisualOptions();
 });
 
+/**
+ * list of the nodes in the dom with additional information to sort them into ad likelyhood
+ */
+let nodeList = [];
+
+/**
+ * content Areas
+ */
+let contentAreas = [
+    {//sidebar
+        container: {},
+        metric: (node) => {
+            return node.srcChanges;
+        }
+    },
+    {//main content
+        container: null,
+        metric: (node) => {
+            let position = node.target&&node.target.getBoundingClientRect?node.target.getBoundingClientRect():{width:0, height:0};
+            let area = (position.width * position.height);
+            //return (area? 0: node.totalAdded / area);
+            return node.totalAdded||0;
+        }
+    }
+]
+
 /*
  * Check if domain is whitelisted, change display accordingly.
  *
@@ -45,7 +72,65 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
     }
     var d = extractHostname(currentTab);
     // console.log(d);
+    containers = selectAllByChildren(document, 1, true);
+    containers.forEach((container) => {
+        nodeList.push({
+            target: container.node,
+            avg: (container.childNodes?node.container.length:0),
+            iterations:0,
+            totalAdded: (container.childNodes?node.container.length:0),
+            totalRemoved: 0,
+            srcChanges: 0,
+        });
+    });
+    let options = {attribute: true, childList: true, subtree: true, attributeFilter: ["src"]};
+    let observer = new MutationObserver((mutations) => {
+        nodeList.forEach((node) => {
+            mutations.forEach((mutation) => {
+                if(mutation.target===node.target){
+                    node.iterations++;
+                    let delta = mutation.addedNodes.length - mutation.removedNodes.length;
+                    node.avg = delta/node.iterations + node.avg*(node.iterations-1)/node.iterations;
+                    node.totalAdded += mutation.addedNodes.length;
+                    node.totalRemoved += mutation.removedNodes.length;
+                    
+                    mutation.addedNodes.forEach((node) => {
+                        nodeList.push({
+                            target: node,
+                            avg: (node.childNodes?node.childNodes.length:0),
+                            totalAdded: (node.childNodes?node.childNodes.length:0),
+                            totalRemoved: 0,
+                            iterations: 0
+                        });
+                    });
+                    if(mutation.type === "attributes"){
+                        node.srcChanges++;
+                    }
+                    //reshuffle the node - weigh them based on the deltas
 
+                    //send to container select
+                    // ML5.process(mutation.addedNodes).then((ads) => {
+                    //     if(ads){
+                    //         highlightAds(ads);
+                    //         adsBlocked = ads.length;
+                    //         updateBadge();
+                    //     }
+                    // });
+                }
+            })
+        });
+        contentAreas.forEach((area) => {
+            if(!area.container)area.container = nodeList[0];
+            nodeList.forEach((node) => {
+                //console.log("current metric: ", area.metric(area.container));
+                if(area.metric(node) > area.metric(area.container)){
+                    area.container = node;
+                }        
+            });
+        });
+
+    })
+    observer.observe(document.body, options);
     // Check if whitelisted
     if (storageCopy.indexOf(d) != -1) {
         // whitelisted
@@ -54,10 +139,50 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
         setBadge();
         setIcon();
     } else {
+        /*
+         * TODO: pull from options to check which one is enabled.
+         */
+        // console.log("Called OCR");
         evaluateContainers('ocr');
+        // evaluateContainers('ml5');
+        //Run ML5 on scroll
+        window.addEventListener("scroll", runOnScroll);
+
+        function KeyPress(e) {
+            var evtobj = window.event ? event : e
+            if (evtobj.keyCode == 82 && evtobj.altKey) {
+                console.log("Alt + R");
+                // evaluateContainers('ml5');
+                evaluateContainers('ocr');
+            }
+        }
+        document.onkeydown = KeyPress;
+
+
     }
 
 });
+
+var lastPosition = 0;
+var timer = null;
+var runOnScroll = function (evt) {
+    var scrollTop = window.pageYOffset;
+    if (timer !== null) {
+        clearTimeout(timer);
+    }
+    timer = setTimeout(function () {
+        // if ((scrollTop - lastPosition) >= window.innerHeight / 2 && scrollTop > lastPosition) {
+        //     evaluateContainers('ml5');
+        //     lastPosition = scrollTop;
+        // }
+        // evaluateContainers('ml5');
+        evaluateContainers('ocr');
+    }, 150);
+};
+
+function nodeMetric(node) {
+    return node.avg * 8 + node.lastCount * 2;
+}
 
 var adsBlocked;
 
@@ -77,20 +202,37 @@ function updateBadge() {
  */
 
 async function evaluateContainers(method) {
+    await ML5.init();
+    let iteration = 0;
+    //add mutation observer here
+    
+    //
     let containers = selectContainers();
-    if(method === 'ocr') {
+    if (method === 'ocr') {
         let ads = await OCR.process(containers);
         highlightAds(ads);
-        adsBlocked = ads.length;
+        adsBlocked += ads.length;
+        updateBadge();
+    } else if (method === 'ml5') {
+        let ads = await ML5.process(containers);
+        highlightAds(ads);
+        console.log("Ads length: ", ads.length);
+        adsBlocked += ads.length;
         updateBadge();
     }
 }
 
 function highlightAds(containers) {
     containers.forEach(container => {
+        container.classList.add("adclipseIdentified");
         if (visualStorageCopy.grayscale.active) {
             if (!container.classList["adclipseGrayscale"]) {
                 container.classList.add("adclipseGrayscale");
+            }
+        }
+        if (visualStorageCopy.remove.active) {
+            if (!container.classList["adclipseRemove"]) {
+                container.classList.add("adclipseRemove");
             }
         }
         if (visualStorageCopy.color.active) {
@@ -142,7 +284,7 @@ function highlightAds(containers) {
  * TODO: make this way better
  */
 function selectContainers() {
-    // return document.querySelectorAll("[data-google-query-id]");
+    //return document.querySelectorAll("[data-google-query-id]");
 
     // reddit posts
     // return document.querySelectorAll("._1poyrkZ7g36PawDueRza-J > article");
@@ -152,8 +294,121 @@ function selectContainers() {
 
     // posts and sidebar 
     // return document.querySelectorAll("._1poyrkZ7g36PawDueRza-J, .ii4q9d-0");
-    return document.querySelectorAll(".ii4q9d-0, .rpBJOHq2PR60pnwJlUyP0 > div");
+
+    // return document.querySelectorAll(".ii4q9d-0, .rpBJOHq2PR60pnwJlUyP0 > div");
+    // //get main content
+    // let mainCont = document.getElementsByClassName("rpBJOHq2PR60pnwJlUyP0 s1rcgrht-0 eEVuIz");
+    // console.log(mainCont);
+    // Array.from(mainCont).forEach((el) => {
+    //     console.log(countChildren(el, 1));
+    // })
+    // containers = selectAllByChildren(document, 1, true);
+    // let co = Array.from(document.getElementsByTagName("*"));
+    // let c = [];
+    // containers.forEach((container) => {
+    //     c.push(container.node);
+    // })
+    // let cont = selectByChildren(document.body);
+    // console.log(containers);
+    // console.log(c[0]);
+    let c = [];
+    contentAreas.forEach((area) => {
+        console.log(area);
+        console.log(area.container);
+        if(area.container && area.container.target && area.container.target.childNodes)c = c.concat(Array.from(area.container.target.childNodes));
+    })
+    console.log(c);
+    return c;
 }
+
+let containers = [];
+
+//returns a node list of elements
+let getContainers = () => {
+    return document.getElementsByTagName("*");
+}
+//gets the height of the node
+let getHeight = (node) => {
+    return node.clientHeight||0;
+}
+
+let getWidth = (node) => {
+    return node.clientWidth||0;
+}
+
+let selectContainerByRatio = (minRatio, maxRatio) => {
+    let selected = [];
+    
+}
+
+let selectRecursive = (node, minRatio, maxRatio, selected) => {
+    node.childNodes.forEach((node) => {
+        if(node.height !== 0 && node.width !== 0){
+            nRatio = getWidth(node)/getHeight(node);
+            if(nRatio <= maxRatio && nRatio >= minRatio)selected.push(node);
+        }
+        selectRecursive(node, minRatio, maxRatio, selected);
+    });
+}
+
+/**
+ * Selects the node with the most children
+*/
+let selectByChildren = (node) => {
+    let returnNode = node
+    let children = countChildren(node, 1);
+    node.childNodes.forEach((node) => {
+        let curr= selectByChildren(node);
+        if(countChildren(curr, 1) > children){
+            returnNode = curr;
+            children = countChildren(curr, 1);
+        }
+    });
+    return returnNode;
+}
+
+let getCandidateContainers =(method) => {
+       
+}
+
+let selectAllByChildren = (node, depth, sorted) => {
+    if(!depth)depth = 1;
+    let selected = [];
+    node.childNodes.forEach((node, index) => {
+        selected = selected.concat(selectAllByChildren(node, depth, true));
+        selected.push({
+            node: node,
+            count: countChildren(node, depth)
+        });
+    });
+    if(sorted){
+        selected.sort((a,b) => {
+            return b.count-a.count;     
+        });
+    }
+    return selected;
+}
+
+let countChildren = (node, depth) => {
+    return node.childElementCount || 0;
+    return countChildrenRec(node, 0, depth);
+}
+
+let countChildrenRec = (node, depth, maxDepth) => {
+    if(depth >= maxDepth)return 1;
+    let count = 0;
+    node.childNodes.forEach((node, index) => {
+        count += countChildrenRec(node, depth+1, maxDepth);
+    });
+    return count;
+}
+let selectMaxChilren = (node, list) => {
+    let children = node.childNodes.length;
+    node.childNodes.forEach((node) => {
+        if(node.childNodes.length > children) ;   
+    });
+}
+
 
 
 /*

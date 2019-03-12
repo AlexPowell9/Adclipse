@@ -36,54 +36,60 @@
 */
 .adclipseGrayscale * {
     filter: grayscale(var(--grayscaleFactor));
-    overflow:hidden;
+    overflow: hidden;
 }
 
 /* Border. */
 .adclipseBorder {
     border: var(--borderThickness) var(--borderStyle) var(--borderColor);
-    overflow:hidden;
+    overflow: hidden;
 }
 
 /* Color. */
 .adclipseColor {
     position: absolute;
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
-    height:100%;
-    width:100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100%;
+    width: 100%;
     z-index: 1000;
     background: var(--colorColor);
     opacity: var(--colorOpacity);
-    filter:none;
-    overflow:hidden;
+    filter: none;
+    overflow: hidden;
+}
+
+/* Remove. */
+.adclipseRemove {
+    display: none;
+    overflow: hidden;
 }
 
 /* Label. */
-.adclipseLabel{
+.adclipseLabel {
     font-size: var(--labelFontSize);
     opacity: var(--labelOpacity);
     text-align: var(--labelTextAlign);
     color: var(--labelColor);
     font-weight: 900;
     position: absolute;
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
-    height:100%;
-    width:100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100%;
+    width: 100%;
     z-index: 1002;
-    filter:none;
-    overflow:auto;
+    filter: none;
+    overflow: auto;
 }
 
-.adclipseLabelText{
-    filter:none;
+.adclipseLabelText {
+    filter: none;
     position: relative;
-    top:var(--labelTextTop);
+    top: var(--labelTextTop);
     line-height: var(--labelFontSize);
 
 }
