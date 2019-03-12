@@ -33,6 +33,11 @@ chrome.storage.local.get("visual", function (returnedStorage) {
     applyVisualOptions();
 });
 
+/**
+ * list of the nodes in the dom with additional information to sort them into ad likelyhood
+ */
+let nodeList = [];
+
 /*
  * Check if domain is whitelisted, change display accordingly.
  *
@@ -45,7 +50,35 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
     }
     var d = extractHostname(currentTab);
     // console.log(d);
-
+    let options = {attribute: true, childList: true, subtree: true};
+    let observer = new MutationObserver((mutations) => {
+        iteration++;
+        nodeList.forEach((node) => {
+            mutations.forEach((mutation) => {
+                if(mutation.target===node.target){
+                    let delta = node.lastCount - node.target.childNodes.length;
+                    node.avg = delta/iteration + node.avg*(iteration-1)/iteration;
+                    //reshuffle the node - weigh them based on the deltas
+                    mutation.addedNodes.forEach((node) => {
+                        nodeList.push({
+                            target: node,
+                            avg: node.childNodes.length,
+                            lastCount: node.childNodes.length
+                        });
+                    })
+                    //send to container select
+                    // ML5.process(mutation.addedNodes).then((ads) => {
+                    //     if(ads){
+                    //         highlightAds(ads);
+                    //         adsBlocked = ads.length;
+                    //         updateBadge();
+                    //     }
+                    // });
+                }
+            })
+        });
+    })
+    observer.observe(document.body, config);
     // Check if whitelisted
     if (storageCopy.indexOf(d) != -1) {
         // whitelisted
@@ -92,11 +125,6 @@ function updateBadge() {
     console.log("Ads on this page:", adsBlocked);
 }
 
-/**
- * list of the nodes in the dom with additional information to sort them into ad likelyhood
- */
-let nodeList = [];
-
 /*
  * Evaluate Containers
  * Gives containers to the selected detection module to decide if they are ads
@@ -107,29 +135,7 @@ async function evaluateContainers(method) {
     await ML5.init();
     let iteration = 0;
     //add mutation observer here
-    let options = {childList: true, subtree: true};
-    let observer = new MutationObserver((mutations) => {
-        iteration++;
-        nodeList.forEach((node) => {
-            mutations.forEach((mutation) => {
-                if(mutation.target===node.target){
-                    let delta = node.lastCount - node.target.childNodes.length;
-                    node.avg = delta/iteration + node.avg*(iteration-1)/iteration;
-                    //reshuffle the node - weigh them based on the deltas
-                    
-                    //send to container select
-                    ML5.process(mutation.addedNodes).then((ads) => {
-                        if(ads){
-                            highlightAds(ads);
-                            adsBlocked = ads.length;
-                            updateBadge();
-                        }
-                    });
-                }
-            })
-        })
-    })
-    observer.observe(document.body, config);
+    
     //
     let containers = selectContainers();
     if (method === 'ocr') {
@@ -215,10 +221,6 @@ function selectContainers() {
 
     // return document.querySelectorAll(".ii4q9d-0, .rpBJOHq2PR60pnwJlUyP0 > div");
     // //get main content
-    let options = {childList: true, subtree: true};
-    let observer = new MutationObserver((mutations) => {
-
-    })
     let mainCont = document.getElementsByClassName("rpBJOHq2PR60pnwJlUyP0 s1rcgrht-0 eEVuIz");
     console.log(mainCont);
     Array.from(mainCont).forEach((el) => {
