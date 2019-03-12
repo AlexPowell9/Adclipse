@@ -38,6 +38,25 @@ chrome.storage.local.get("visual", function (returnedStorage) {
  */
 let nodeList = [];
 
+/**
+ * content Areas
+ */
+let contentAreas = [
+    {//sidebar
+        container: {},
+        metric: () => {
+            return node.srcChanges;
+        }
+    },
+    {//main content
+        container: {},
+        metric: (node) => {
+            let position = node.target.getBoundingClientRect();
+            return node.totalAdded / (position.width * position.height);
+        }
+    }
+]
+
 /*
  * Check if domain is whitelisted, change display accordingly.
  *
@@ -58,7 +77,7 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
             iterations:0,
             totalAdded: node.childNodes.length,
             totalRemoved: 0,
-            srcChanges: 0
+            srcChanges: 0,
         });
     });
     let options = {attribute: true, childList: true, subtree: true, attributeFilter: ["src"]};
@@ -97,9 +116,13 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
                 }
             })
         });
-        nodeList.sort((a, b) => {
-            return nodeMetric(a) - nodeMetric(b);
-        })
+        contentAreas.forEach((area) => {
+            if(!area.container)area.container = nodeList[0] || {};
+            nodeList.forEach((node) => {
+                if(area.metric(node) > area.metric(area.container))area.container = node;
+            });
+        });
+        
     })
     observer.observe(document.body, options);
     // Check if whitelisted
@@ -154,8 +177,6 @@ function sortedIndex(array, value) {
 
 function nodeMetric(node) {
     return node.avg * 8 + node.lastCount * 2;
-
-
 }
 
 var adsBlocked;
