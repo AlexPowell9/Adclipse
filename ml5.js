@@ -38,6 +38,20 @@ function ml5Initialize() {
     });
 }
 
+ML5.init = async () => {
+    if(!classifier)await ml5Initialize();
+    return ;
+}
+
+ML5.processSingle = async function(container) {
+    return await convertToCanvas(container).then((canvas) => {
+        return processImages(canvas);
+    }).then(result => {
+        if (result === 'Advertisement' || result === 'Promoted') return result;
+        else return null;
+    });
+}
+
 //This is the variable where the screenshot is stored.
 var dataUrl = null;
 /*
@@ -164,6 +178,21 @@ function convertToCanvases(containers) {
     return promises;
 }
 
+/*
+ * Convert To Canvas
+ * Takes in containers and uses html2canvas to convert them to canvases
+ * Returns: html2canvas promises
+ */
+function convertToCanvas(container) {
+    let options = {
+        logging: false,
+        ignoreElements: function (element) {
+            // return element.tagName.toLowerCase() == 'iframe' || element.tagName.toLowerCase() == 'img';
+            return element.tagName.toLowerCase() == 'iframe';
+        }
+    };
+    return html2canvas(container, options);
+}
 
 /*
  * ML5 Images
