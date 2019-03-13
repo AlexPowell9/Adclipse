@@ -44,21 +44,72 @@ let nodeList = [];
  */
 let contentAreas = [
     {//sidebar
-        container: {},
+        container: [],
         metric: (node) => {
             return node.srcChanges;
         }
     },
     {//main content
-        container: null,
+        container: [null, null, null],
         metric: (node) => {
-            let position = node.target&&node.target.getBoundingClientRect?node.target.getBoundingClientRect():{width:0, height:0};
-            let area = (position.width * position.height);
-            //return (area? 0: node.totalAdded / area);
-            return node.totalAdded||0;
+            if(!node)return 0;
+            if(!node.target)return 0;
+            if(node.target.tagName === "BODY" || node.target.tagName === "HEAD")return 0;
+            try{
+                let container = node.target;
+                let element = container;
+                let dimensions = {};
+                dimensions.top = -window.scrollY;
+                dimensions.left = -window.scrollX;
+                try{
+                    while (element !== document.body) {
+                        dimensions.top += element.offsetTop;
+                        dimensions.left += element.offsetLeft;
+                        element = element.offsetParent;
+                    }
+                }
+                catch(err) {
+                    return 0;
+                }
+                if(dimensions.top > window.height || dimensions.left > window.width){
+                    return 0;
+                }
+                dimensions.width = container.offsetWidth;
+                dimensions.height = container.offsetHeight;
+                dimensions.right = (dimensions.left+dimensions.width);
+                dimensions.bottom = (dimensions.top+dimensions.height);
+                if(dimensions.right > window.width){
+                    dimensions.right=window.width;
+                }
+                if(dimensions.bottom > window.height){
+                    dimensions.bottom = window.height;
+                }
+                
+                let windowSize = {};
+                windowSize.width = window.innerWidth;
+                windowSize.height = window.innerHeight
+                dimensions.top /= windowSize.height;
+                dimensions.left /= windowSize.width;
+                dimensions.bottom /= windowSize.height;
+                dimensions.right /= windowSize.width;
+                let xFactor = densityFunction(dimensions.left, dimensions.right);
+                let yFactor = densityFunction(dimensions.top, dimensions.bottom);
+                let areaFactor = xFactor * yFactor;
+                //return (area? 0: node.totalAdded / area);
+                return areaFactor*node.totalAdded||0;
+            }
+            catch(err){
+                return 0;
+            }
         }
     }
 ]
+
+let densityFunction = (x1, x2) => {
+    let xFactor2 = -(4/3)*(x2,3) + (2*(Math.pow(x2,2)));
+    let xFactor1 = -(4/3)*(x1,3) + (2*(Math.pow(x1,2)));
+    return xFactor2 - xFactor1;
+}
 
 
 /*
@@ -117,6 +168,7 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
     });
     let options = {attribute: true, childList: true, subtree: true, attributeFilter: ["src"]};
     let observer = new MutationObserver((mutations) => {
+        var t0 = performance.now();
         nodeList.forEach((node) => {
             mutations.forEach((mutation) => {
                 if(mutation.target===node.target){
@@ -138,6 +190,11 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
                     if(mutation.type === "attributes"){
                         node.srcChanges++;
                     }
+                    mutation.removedNodes.forEach((removed) => {
+                        nodeList.forEach((node, index) => {
+                            if(removed===node)nodeList.splice(index, 1);
+                        })
+                    })
                     //reshuffle the node - weigh them based on the deltas
 
                     //send to container select
@@ -152,15 +209,19 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
             })
         });
         contentAreas.forEach((area) => {
-            if(!area.container)area.container = nodeList[0];
-            nodeList.forEach((node) => {
-                //console.log("current metric: ", area.metric(area.container));
-                if(area.metric(node) > area.metric(area.container)){
-                    area.container = node;
-                }        
-            });
+            contentAreas.container.forEach((container) => {
+                if(!area.container)area.container = [nodeList[0]];
+                nodeList.forEach((node) => {
+                    //console.log("current metric: ", area.metric(area.container));
+                    if(area.metric(node) > area.metric(container)){
+                        container = node;
+                    }        
+                });
+            })
+            
         });
-
+        var t1 = performance.now();
+        console.log("Selected Containers in: " + (t1 - t0).toFixed(2) + " ms.")
     })
     observer.observe(document.body, options);
     // Check if whitelisted
@@ -175,6 +236,7 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
          * TODO: pull from options to check which one is enabled.
          */
         // console.log("Called OCR");
+        console.log(contentAreas[1].metric(document.body));
         if (detectionStorageCopy.ml5.active) {
             evaluateContainers('ml5');
         } else {
@@ -244,24 +306,25 @@ function updateBadge() {
  */
 
 async function evaluateContainers(method) {
-    await ML5.init();
+    //await ML5.init();
     let iteration = 0;
     //add mutation observer here
     
     //
     let containers = selectContainers();
-    if (method === 'ocr') {
-        let ads = await OCR.process(containers);
-        highlightAds(ads);
-        adsBlocked += ads.length;
-        updateBadge();
-    } else if (method === 'ml5') {
-        let ads = await ML5.process(containers);
-        highlightAds(ads);
-        console.log("Ads length: ", ads.length);
-        adsBlocked += ads.length;
-        updateBadge();
-    }
+    highlightAds(containers);
+    // if (method === 'ocr') {
+    //     let ads = await OCR.process(containers);
+    //     highlightAds(ads);
+    //     adsBlocked += ads.length;
+    //     updateBadge();
+    // } else if (method === 'ml5') {
+    //     let ads = await ML5.process(containers);
+    //     highlightAds(ads);
+    //     console.log("Ads length: ", ads.length);
+    //     adsBlocked += ads.length;
+    //     updateBadge();
+    // }
 }
 
 function highlightAds(containers) {
@@ -353,11 +416,15 @@ function selectContainers() {
     // let cont = selectByChildren(document.body);
     // console.log(containers);
     // console.log(c[0]);
+
     let c = [];
     contentAreas.forEach((area) => {
         console.log(area);
         console.log(area.container);
-        if(area.container && area.container.target && area.container.target.childNodes)c = c.concat(Array.from(area.container.target.childNodes));
+        area.container.forEach((container) => {
+            if(container && container.target && container.target.childNodes)c = c.concat(Array.from(container.target.childNodes));
+        })
+        
     })
     console.log(c);
     return c;
