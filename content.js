@@ -45,6 +45,9 @@ let nodeList = [];
 let contentAreas = [
     {//sidebar
         container: [],
+        tolerance = (node) => {
+            return false;
+        },
         metric: (node) => {
             return node.srcChanges;
         }
@@ -172,15 +175,6 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
             srcChanges: 0,
         });
         nodeList[nodeList.length-1].metrics = [];
-        contentAreas.forEach((area, index) => {
-            nodeList[nodeList.length-1].metrics = area.metric(node);
-            for(let i = 0; i < area.containers.length; i++ ){
-                if(node.metrics[index] > area.containers[i].metrics[index]){
-                    area.containers.splice(i, 0, node);
-                    break;
-                }
-            }
-        });
         reCalcMetrics(nodeList[nodeList.length-1]);
     });
     let options = {attribute: true, childList: true, subtree: true, attributeFilter: ["src"]};
