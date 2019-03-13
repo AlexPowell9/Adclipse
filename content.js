@@ -50,7 +50,13 @@ let contentAreas = [
         }
     },
     {//main content
-        container: [null, null, null],
+        containers: [null, null, null],
+        tolerance: (node) => {
+            if(node.metric[1]>this.containers[0].metric[1]*0.7){
+                return true
+            }
+            return false;
+        },
         metric: (node) => {
             if(!node)return 0;
             if(!node.target)return 0;
@@ -258,12 +264,20 @@ let reCalcMetrics = (node) => {
     if(!node.metrics)node.metrics = [];
     contentAreas.forEach((area, index) => {
         node.metrics[index] = area.metric(node);
+        let added = false
         for(let i = 0; i < area.containers.length; i++ ){
             if(node.metrics[index] > area.containers[i].metrics[index]){
                 area.containers.splice(i, 0, node);
+                added = true;
+                if(i === 0){
+                    for(let j = 1; j < area.containers.length; j++){
+                        if(!area.tolerance(area.containers[j]))area.containers = area.containers.slice(0, j-1);
+                    }
+                }
                 break;
             }
         }
+        if((!added && area.tolerance(node))||area.containers.length === 0)area.containers.push(node);
     });
 
 }
