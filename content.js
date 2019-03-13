@@ -155,7 +155,7 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
     }
     var d = extractHostname(currentTab);
     // console.log(d);
-    containers = selectAllByChildren(document, 1, true);
+    containers = selectAllByChildren(document.body, 1, true);
     containers.forEach((container) => {
         nodeList.push({
             target: container.node,
@@ -165,6 +165,17 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
             totalRemoved: 0,
             srcChanges: 0,
         });
+        nodeList[nodeList.length-1].metrics = [];
+        contentAreas.forEach((area, index) => {
+            nodeList[nodeList.length-1].metrics = area.metric(node);
+            for(let i = 0; i < area.containers.length; i++ ){
+                if(node.metrics[index] > area.containers[i].metrics[index]){
+                    area.containers.splice(i, 0, node);
+                    break;
+                }
+            }
+        });
+        reCalcMetrics(nodeList[nodeList.length-1]);
     });
     let options = {attribute: true, childList: true, subtree: true, attributeFilter: ["src"]};
     let observer = new MutationObserver((mutations) => {
@@ -186,6 +197,7 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
                             totalRemoved: 0,
                             iterations: 0
                         });
+                        reCalcMetrics(nodeList[nodeList.length-1]);
                     });
                     if(mutation.type === "attributes"){
                         node.srcChanges++;
@@ -194,31 +206,10 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
                         nodeList.forEach((node, index) => {
                             if(removed===node)nodeList.splice(index, 1);
                         })
-                    })
-                    //reshuffle the node - weigh them based on the deltas
-
-                    //send to container select
-                    // ML5.process(mutation.addedNodes).then((ads) => {
-                    //     if(ads){
-                    //         highlightAds(ads);
-                    //         adsBlocked = ads.length;
-                    //         updateBadge();
-                    //     }
-                    // });
+                    });
+                    reCalcMetrics(node);
                 }
             })
-        });
-        contentAreas.forEach((area) => {
-            contentAreas.container.forEach((container) => {
-                if(!area.container)area.container = [nodeList[0]];
-                nodeList.forEach((node) => {
-                    //console.log("current metric: ", area.metric(area.container));
-                    if(area.metric(node) > area.metric(container)){
-                        container = node;
-                    }        
-                });
-            })
-            
         });
         var t1 = performance.now();
         console.log("Selected Containers in: " + (t1 - t0).toFixed(2) + " ms.")
@@ -262,6 +253,20 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
     }
 
 });
+
+let reCalcMetrics = (node) => {
+    if(!node.metrics)node.metrics = [];
+    contentAreas.forEach((area, index) => {
+        node.metrics[index] = area.metric(node);
+        for(let i = 0; i < area.containers.length; i++ ){
+            if(node.metrics[index] > area.containers[i].metrics[index]){
+                area.containers.splice(i, 0, node);
+                break;
+            }
+        }
+    });
+
+}
 
 var lastPosition = 0;
 var timer = null;
