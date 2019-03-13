@@ -44,8 +44,8 @@ let nodeList = [];
  */
 let contentAreas = [
     {//sidebar
-        container: [],
-        tolerance = (node) => {
+        containers: [],
+        tolerance: (node) => {
             return false;
         },
         metric: (node) => {
@@ -433,8 +433,8 @@ function selectContainers() {
     let c = [];
     contentAreas.forEach((area) => {
         console.log(area);
-        console.log(area.container);
-        area.container.forEach((container) => {
+        console.log(area.containers);
+        area.containers.forEach((container) => {
             if(container && container.target && container.target.childNodes)c = c.concat(Array.from(container.target.childNodes));
         })
         
