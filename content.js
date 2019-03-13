@@ -53,9 +53,10 @@ let contentAreas = [
         }
     },
     {//main content
-        containers: [null, null, null],
+        containers: [],
         tolerance: (node) => {
-            if(node.metric[1]>this.containers[0].metric[1]*0.7){
+            if(!node || !node.metrics)return false
+            if(node.metrics[1]>this.containers[0].metrics[1]*0.7){
                 return true
             }
             return false;
@@ -271,7 +272,7 @@ let reCalcMetrics = (node) => {
                 break;
             }
         }
-        if((!added && area.tolerance(node))||area.containers.length === 0)area.containers.push(node);
+        if(area.containers.length === 0||(!added && area.tolerance(node)))area.containers.push(node);
     });
 
 }
