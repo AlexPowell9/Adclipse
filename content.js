@@ -60,6 +60,38 @@ let contentAreas = [
     }
 ]
 
+
+/*
+ * Get Detection Options from storage and apply them.
+ */
+var detectionStorageCopy = [];
+chrome.storage.local.get("detection", function (returnedStorage) {
+    if (returnedStorage['detection'] !== undefined) {
+        detectionStorageCopy = JSON.parse(returnedStorage['detection']);
+    } else {
+        //Does not exist, so we create it with defaults
+        detectionStorageCopy = getDetectionDefaults();
+        chrome.storage.local.set({
+            "detection": JSON.stringify(detectionStorageCopy)
+        }, function () {
+            //Callback
+            console.log("Detection Settings Updated!");
+        });
+    }
+});
+
+/*
+ * Return array of default option values, for when there are no options present in storage.
+ */
+function getDetectionDefaults() {
+    var storage = {};
+    //Grayscale
+    storage.ml5 = {
+        "active": true
+    };
+    return storage;
+}
+
 /*
  * Check if domain is whitelisted, change display accordingly.
  *
@@ -143,17 +175,23 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
          * TODO: pull from options to check which one is enabled.
          */
         // console.log("Called OCR");
-        evaluateContainers('ocr');
-        // evaluateContainers('ml5');
-        //Run ML5 on scroll
+        if (detectionStorageCopy.ml5.active) {
+            evaluateContainers('ml5');
+        } else {
+            evaluateContainers('ocr');
+        }
+        //Run on scroll
         window.addEventListener("scroll", runOnScroll);
 
         function KeyPress(e) {
             var evtobj = window.event ? event : e
             if (evtobj.keyCode == 82 && evtobj.altKey) {
                 console.log("Alt + R");
-                // evaluateContainers('ml5');
-                evaluateContainers('ocr');
+                if (detectionStorageCopy.ml5.active) {
+                    evaluateContainers('ml5');
+                } else {
+                    evaluateContainers('ocr');
+                }
             }
         }
         document.onkeydown = KeyPress;
@@ -165,6 +203,7 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
 
 var lastPosition = 0;
 var timer = null;
+
 var runOnScroll = function (evt) {
     var scrollTop = window.pageYOffset;
     if (timer !== null) {
@@ -175,8 +214,11 @@ var runOnScroll = function (evt) {
         //     evaluateContainers('ml5');
         //     lastPosition = scrollTop;
         // }
-        // evaluateContainers('ml5');
-        evaluateContainers('ocr');
+        if (detectionStorageCopy.ml5.active) {
+            evaluateContainers('ml5');
+        } else {
+            evaluateContainers('ocr');
+        }
     }, 150);
 };
 
@@ -503,6 +545,10 @@ function getDefaults() {
         "active": false,
         "color": "#000000",
         "opacity": 0.5
+    };
+    //Remove
+    storage.remove = {
+        "active": false
     };
     //Border
     storage.border = {
