@@ -42,20 +42,22 @@ let nodeList = [];
 /**
  * content Areas
  */
-let contentAreas = [
-    {//sidebar
+let contentAreas = [{ //sidebar
         container: {},
         metric: (node) => {
             return node.srcChanges;
         }
     },
-    {//main content
+    { //main content
         container: null,
         metric: (node) => {
-            let position = node.target&&node.target.getBoundingClientRect?node.target.getBoundingClientRect():{width:0, height:0};
+            let position = node.target && node.target.getBoundingClientRect ? node.target.getBoundingClientRect() : {
+                width: 0,
+                height: 0
+            };
             let area = (position.width * position.height);
             //return (area? 0: node.totalAdded / area);
-            return node.totalAdded||0;
+            return node.totalAdded || 0;
         }
     }
 ]
@@ -108,34 +110,39 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
     containers.forEach((container) => {
         nodeList.push({
             target: container.node,
-            avg: (container.childNodes?node.container.length:0),
-            iterations:0,
-            totalAdded: (container.childNodes?node.container.length:0),
+            avg: (container.childNodes ? node.container.length : 0),
+            iterations: 0,
+            totalAdded: (container.childNodes ? node.container.length : 0),
             totalRemoved: 0,
             srcChanges: 0,
         });
     });
-    let options = {attribute: true, childList: true, subtree: true, attributeFilter: ["src"]};
+    let options = {
+        attribute: true,
+        childList: true,
+        subtree: true,
+        attributeFilter: ["src"]
+    };
     let observer = new MutationObserver((mutations) => {
         nodeList.forEach((node) => {
             mutations.forEach((mutation) => {
-                if(mutation.target===node.target){
+                if (mutation.target === node.target) {
                     node.iterations++;
                     let delta = mutation.addedNodes.length - mutation.removedNodes.length;
-                    node.avg = delta/node.iterations + node.avg*(node.iterations-1)/node.iterations;
+                    node.avg = delta / node.iterations + node.avg * (node.iterations - 1) / node.iterations;
                     node.totalAdded += mutation.addedNodes.length;
                     node.totalRemoved += mutation.removedNodes.length;
-                    
+
                     mutation.addedNodes.forEach((node) => {
                         nodeList.push({
                             target: node,
-                            avg: (node.childNodes?node.childNodes.length:0),
-                            totalAdded: (node.childNodes?node.childNodes.length:0),
+                            avg: (node.childNodes ? node.childNodes.length : 0),
+                            totalAdded: (node.childNodes ? node.childNodes.length : 0),
                             totalRemoved: 0,
                             iterations: 0
                         });
                     });
-                    if(mutation.type === "attributes"){
+                    if (mutation.type === "attributes") {
                         node.srcChanges++;
                     }
                     //reshuffle the node - weigh them based on the deltas
@@ -152,12 +159,12 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
             })
         });
         contentAreas.forEach((area) => {
-            if(!area.container)area.container = nodeList[0];
+            if (!area.container) area.container = nodeList[0];
             nodeList.forEach((node) => {
                 //console.log("current metric: ", area.metric(area.container));
-                if(area.metric(node) > area.metric(area.container)){
+                if (area.metric(node) > area.metric(area.container)) {
                     area.container = node;
-                }        
+                }
             });
         });
 
@@ -247,7 +254,7 @@ async function evaluateContainers(method) {
     await ML5.init();
     let iteration = 0;
     //add mutation observer here
-    
+
     //
     let containers = selectContainers();
     if (method === 'ocr') {
@@ -326,7 +333,7 @@ function highlightAds(containers) {
  * TODO: make this way better
  */
 function selectContainers() {
-    //return document.querySelectorAll("[data-google-query-id]");
+    //return document.querySelectorAll("[data-google-query-id], .rpBJOHq2PR60pnwJlUyP0 > div");
 
     // reddit posts
     // return document.querySelectorAll("._1poyrkZ7g36PawDueRza-J > article");
@@ -357,8 +364,9 @@ function selectContainers() {
     contentAreas.forEach((area) => {
         console.log(area);
         console.log(area.container);
-        if(area.container && area.container.target && area.container.target.childNodes)c = c.concat(Array.from(area.container.target.childNodes));
+        if (area.container && area.container.target && area.container.target.childNodes) c = c.concat(Array.from(area.container.target.childNodes));
     })
+    c = c.concat(Array.from(document.querySelectorAll("[data-google-query-id]")));
     console.log(c);
     return c;
 }
@@ -371,23 +379,23 @@ let getContainers = () => {
 }
 //gets the height of the node
 let getHeight = (node) => {
-    return node.clientHeight||0;
+    return node.clientHeight || 0;
 }
 
 let getWidth = (node) => {
-    return node.clientWidth||0;
+    return node.clientWidth || 0;
 }
 
 let selectContainerByRatio = (minRatio, maxRatio) => {
     let selected = [];
-    
+
 }
 
 let selectRecursive = (node, minRatio, maxRatio, selected) => {
     node.childNodes.forEach((node) => {
-        if(node.height !== 0 && node.width !== 0){
-            nRatio = getWidth(node)/getHeight(node);
-            if(nRatio <= maxRatio && nRatio >= minRatio)selected.push(node);
+        if (node.height !== 0 && node.width !== 0) {
+            nRatio = getWidth(node) / getHeight(node);
+            if (nRatio <= maxRatio && nRatio >= minRatio) selected.push(node);
         }
         selectRecursive(node, minRatio, maxRatio, selected);
     });
@@ -395,13 +403,13 @@ let selectRecursive = (node, minRatio, maxRatio, selected) => {
 
 /**
  * Selects the node with the most children
-*/
+ */
 let selectByChildren = (node) => {
     let returnNode = node
     let children = countChildren(node, 1);
     node.childNodes.forEach((node) => {
-        let curr= selectByChildren(node);
-        if(countChildren(curr, 1) > children){
+        let curr = selectByChildren(node);
+        if (countChildren(curr, 1) > children) {
             returnNode = curr;
             children = countChildren(curr, 1);
         }
@@ -409,12 +417,12 @@ let selectByChildren = (node) => {
     return returnNode;
 }
 
-let getCandidateContainers =(method) => {
-       
+let getCandidateContainers = (method) => {
+
 }
 
 let selectAllByChildren = (node, depth, sorted) => {
-    if(!depth)depth = 1;
+    if (!depth) depth = 1;
     let selected = [];
     node.childNodes.forEach((node, index) => {
         selected = selected.concat(selectAllByChildren(node, depth, true));
@@ -423,9 +431,9 @@ let selectAllByChildren = (node, depth, sorted) => {
             count: countChildren(node, depth)
         });
     });
-    if(sorted){
-        selected.sort((a,b) => {
-            return b.count-a.count;     
+    if (sorted) {
+        selected.sort((a, b) => {
+            return b.count - a.count;
         });
     }
     return selected;
@@ -437,17 +445,17 @@ let countChildren = (node, depth) => {
 }
 
 let countChildrenRec = (node, depth, maxDepth) => {
-    if(depth >= maxDepth)return 1;
+    if (depth >= maxDepth) return 1;
     let count = 0;
     node.childNodes.forEach((node, index) => {
-        count += countChildrenRec(node, depth+1, maxDepth);
+        count += countChildrenRec(node, depth + 1, maxDepth);
     });
     return count;
 }
 let selectMaxChilren = (node, list) => {
     let children = node.childNodes.length;
     node.childNodes.forEach((node) => {
-        if(node.childNodes.length > children) ;   
+        if (node.childNodes.length > children);
     });
 }
 
