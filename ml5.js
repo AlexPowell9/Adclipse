@@ -39,11 +39,11 @@ function ml5Initialize() {
 }
 
 ML5.init = async () => {
-    if(!classifier)await ml5Initialize();
-    return ;
+    if (!classifier) await ml5Initialize();
+    return;
 }
 
-ML5.processSingle = async function(container) {
+ML5.processSingle = async function (container) {
     return await convertToCanvas(container).then((canvas) => {
         return processImages(canvas);
     }).then(result => {
@@ -133,8 +133,11 @@ ML5.process = async function (containers) {
 function convertToCanvases(containers) {
     let promises = [];
     containers.forEach(container => {
-        //Ignore already identified ads
-        if (container.classList.contains("adclipseIdentified")) {
+        //Ignore already identified ads and stuff that doesnt exist
+        if (!container || !container.classList) {
+            promises.push(null);
+            return;
+        } else if (container.classList.contains("adclipseIdentified")) {
             promises.push(null);
             return;
         }
@@ -161,7 +164,7 @@ function convertToCanvases(containers) {
         // console.log(dimensions);
         // console.log("Width", window.innerWidth);
         // console.log("Height", window.innerHeight);
-        if (dimensions.top > window.innerHeight || dimensions.top < 0) {
+        if (dimensions.top > window.innerHeight || dimensions.top < 0 || dimensions.width <= 0 || dimensions.height <= 0) {
             //Sorting hat hack. See description for more details.
             promises.push(null);
             return;

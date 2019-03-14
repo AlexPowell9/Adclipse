@@ -92,8 +92,11 @@ function convertToCanvases(containers) {
     // return promises;
     let promises = [];
     containers.forEach(container => {
-        //Ignore already identified ads
-        if (container.classList.contains("adclipseIdentified")) {
+        //Ignore already identified ads and stuff that doesnt exist
+        if (!container || !container.classList){
+            promises.push(null);
+            return;
+        }else if(container.classList.contains("adclipseIdentified")){
             promises.push(null);
             return;
         }
