@@ -42,8 +42,7 @@ let nodeList = [];
 /**
  * content Areas
  */
-let contentAreas = [
-    {//sidebar
+let contentAreas = [{ //sidebar
         containers: [],
         tolerance: (node) => {
             return false;
@@ -52,49 +51,55 @@ let contentAreas = [
             return node.srcChanges;
         }
     },
-    {//main content
+    { //main content
         containers: [],
         tolerance: (node) => {
-            if(!node || !node.metrics)return false
-            if(node.metrics[1]>this.containers[0].metrics[1]*0.7){
+            if (!node || !node.metrics || !node.metrics[1]) return false
+            if (node.metrics[1] > contentAreas[1].containers[0].metrics[1]) {
+                console.log(node.metrics[1], contentAreas[1].containers[0].metrics[1]);
                 return true
             }
             return false;
         },
         metric: (node) => {
-            if(!node)return 0;
-            if(!node.target)return 0;
-            if(node.target.tagName === "BODY" || node.target.tagName === "HEAD")return 0;
-            try{
+            return node.totalAdded || 0;
+             if(node && node.childNodes){
+                 return node.childNodes.length;
+             }else{
+                 return 0;
+             }
+            if (!node) return 0;
+            if (!node.target) return 0;
+            if (node.target.tagName === "BODY" || node.target.tagName === "HEAD") return 0;
+            try {
                 let container = node.target;
                 let element = container;
                 let dimensions = {};
                 dimensions.top = -window.scrollY;
                 dimensions.left = -window.scrollX;
-                try{
+                try {
                     while (element !== document.body) {
                         dimensions.top += element.offsetTop;
                         dimensions.left += element.offsetLeft;
                         element = element.offsetParent;
                     }
-                }
-                catch(err) {
+                } catch (err) {
                     return 0;
                 }
-                if(dimensions.top > window.height || dimensions.left > window.width){
+                if (dimensions.top > window.height || dimensions.left > window.width) {
                     return 0;
                 }
                 dimensions.width = container.offsetWidth;
                 dimensions.height = container.offsetHeight;
-                dimensions.right = (dimensions.left+dimensions.width);
-                dimensions.bottom = (dimensions.top+dimensions.height);
-                if(dimensions.right > window.width){
-                    dimensions.right=window.width;
+                dimensions.right = (dimensions.left + dimensions.width);
+                dimensions.bottom = (dimensions.top + dimensions.height);
+                if (dimensions.right > window.width) {
+                    dimensions.right = window.width;
                 }
-                if(dimensions.bottom > window.height){
+                if (dimensions.bottom > window.height) {
                     dimensions.bottom = window.height;
                 }
-                
+
                 let windowSize = {};
                 windowSize.width = window.innerWidth;
                 windowSize.height = window.innerHeight
@@ -106,9 +111,8 @@ let contentAreas = [
                 let yFactor = densityFunction(dimensions.top, dimensions.bottom);
                 let areaFactor = xFactor * yFactor;
                 //return (area? 0: node.totalAdded / area);
-                return areaFactor*node.totalAdded||0;
-            }
-            catch(err){
+                return node.totalAdded || 0;
+            } catch (err) {
                 return 0;
             }
         }
@@ -116,8 +120,8 @@ let contentAreas = [
 ]
 
 let densityFunction = (x1, x2) => {
-    let xFactor2 = -(4/3)*(x2,3) + (2*(Math.pow(x2,2)));
-    let xFactor1 = -(4/3)*(x1,3) + (2*(Math.pow(x1,2)));
+    let xFactor2 = -(4 / 3) * (x2, 3) + (2 * (Math.pow(x2, 2)));
+    let xFactor1 = -(4 / 3) * (x1, 3) + (2 * (Math.pow(x1, 2)));
     return xFactor2 - xFactor1;
 }
 
@@ -169,45 +173,50 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
     containers.forEach((container) => {
         nodeList.push({
             target: container.node,
-            avg: (container.childNodes?node.container.length:0),
-            iterations:0,
-            totalAdded: (container.childNodes?node.container.length:0),
+            avg: (container.childNodes ? node.container.length : 0),
+            iterations: 0,
+            totalAdded: (container.childNodes ? node.container.length : 0),
             totalRemoved: 0,
             srcChanges: 0,
         });
-        nodeList[nodeList.length-1].metrics = [];
-        reCalcMetrics(nodeList[nodeList.length-1]);
+        nodeList[nodeList.length - 1].metrics = [];
+        reCalcMetrics(nodeList[nodeList.length - 1]);
     });
-    let options = {attribute: true, childList: true, subtree: true, attributeFilter: ["src"]};
+    let options = {
+        attribute: true,
+        childList: true,
+        subtree: true,
+        attributeFilter: ["src"]
+    };
     let observer = new MutationObserver((mutations) => {
         var t0 = performance.now();
         nodeList.forEach((node) => {
             mutations.forEach((mutation) => {
-                if(mutation.target===node.target){
+                if (mutation.target === node.target) {
                     node.iterations++;
                     let delta = mutation.addedNodes.length - mutation.removedNodes.length;
-                    node.avg = delta/node.iterations + node.avg*(node.iterations-1)/node.iterations;
+                    node.avg = delta / node.iterations + node.avg * (node.iterations - 1) / node.iterations;
                     node.totalAdded += mutation.addedNodes.length;
                     node.totalRemoved += mutation.removedNodes.length;
-                    
+
                     mutation.addedNodes.forEach((node) => {
                         nodeList.push({
                             target: node,
-                            avg: (node.childNodes?node.childNodes.length:0),
-                            totalAdded: (node.childNodes?node.childNodes.length:0),
+                            avg: (node.childNodes ? node.childNodes.length : 0),
+                            totalAdded: (node.childNodes ? node.childNodes.length : 0),
                             totalRemoved: 0,
                             iterations: 0
                         });
-                        reCalcMetrics(nodeList[nodeList.length-1]);
+                        reCalcMetrics(nodeList[nodeList.length - 1]);
                     });
-                    if(mutation.type === "attributes"){
+                    if (mutation.type === "attributes") {
                         node.srcChanges++;
                     }
-                    mutation.removedNodes.forEach((removed) => {
-                        nodeList.forEach((node, index) => {
-                            if(removed===node)nodeList.splice(index, 1);
-                        })
-                    });
+                    // mutation.removedNodes.forEach((removed) => {
+                    //     nodeList.forEach((node, index) => {
+                    //         if (removed === node) nodeList.splice(index, 1);
+                    //     })
+                    // });
                     reCalcMetrics(node);
                 }
             })
@@ -256,23 +265,23 @@ chrome.storage.local.get("whitelist", function (returnedStorage) {
 });
 
 let reCalcMetrics = (node) => {
-    if(!node.metrics)node.metrics = [];
+    if (!node.metrics) node.metrics = [];
     contentAreas.forEach((area, index) => {
         node.metrics[index] = area.metric(node);
         let added = false
-        for(let i = 0; i < area.containers.length; i++ ){
-            if(node.metrics[index] > area.containers[i].metrics[index]){
+        for (let i = 0; i < area.containers.length; i++) {
+            if (node.metrics[index] > area.containers[i].metrics[index]) {
                 area.containers.splice(i, 0, node);
                 added = true;
-                if(i === 0){
-                    for(let j = 1; j < area.containers.length; j++){
-                        if(!area.tolerance(area.containers[j]))area.containers = area.containers.slice(0, j-1);
+                if (i === 0) {
+                    for (let j = 1; j < area.containers.length; j++) {
+                        if (!area.tolerance(area.containers[j])) area.containers = area.containers.slice(0, j - 1);
                     }
                 }
                 break;
             }
         }
-        if(area.containers.length === 0||(!added && area.tolerance(node)))area.containers.push(node);
+        if (area.containers.length === 0 || (!added && area.tolerance(node))) area.containers.push(node);
     });
 
 }
@@ -323,7 +332,7 @@ async function evaluateContainers(method) {
     //await ML5.init();
     let iteration = 0;
     //add mutation observer here
-    
+
     //
     let containers = selectContainers();
     highlightAds(containers);
@@ -433,14 +442,14 @@ function selectContainers() {
 
     let c = [];
     contentAreas.forEach((area) => {
-        console.log(area);
+        // console.log(area);
         console.log(area.containers);
         area.containers.forEach((container) => {
-            if(container && container.target && container.target.childNodes)c = c.concat(Array.from(container.target.childNodes));
+            if (container && container.target && container.target.childNodes) c = c.concat(Array.from(container.target.childNodes));
         })
-        
+
     })
-    console.log(c);
+    // console.log(c);
     return c;
 }
 
@@ -452,23 +461,23 @@ let getContainers = () => {
 }
 //gets the height of the node
 let getHeight = (node) => {
-    return node.clientHeight||0;
+    return node.clientHeight || 0;
 }
 
 let getWidth = (node) => {
-    return node.clientWidth||0;
+    return node.clientWidth || 0;
 }
 
 let selectContainerByRatio = (minRatio, maxRatio) => {
     let selected = [];
-    
+
 }
 
 let selectRecursive = (node, minRatio, maxRatio, selected) => {
     node.childNodes.forEach((node) => {
-        if(node.height !== 0 && node.width !== 0){
-            nRatio = getWidth(node)/getHeight(node);
-            if(nRatio <= maxRatio && nRatio >= minRatio)selected.push(node);
+        if (node.height !== 0 && node.width !== 0) {
+            nRatio = getWidth(node) / getHeight(node);
+            if (nRatio <= maxRatio && nRatio >= minRatio) selected.push(node);
         }
         selectRecursive(node, minRatio, maxRatio, selected);
     });
@@ -476,13 +485,13 @@ let selectRecursive = (node, minRatio, maxRatio, selected) => {
 
 /**
  * Selects the node with the most children
-*/
+ */
 let selectByChildren = (node) => {
     let returnNode = node
     let children = countChildren(node, 1);
     node.childNodes.forEach((node) => {
-        let curr= selectByChildren(node);
-        if(countChildren(curr, 1) > children){
+        let curr = selectByChildren(node);
+        if (countChildren(curr, 1) > children) {
             returnNode = curr;
             children = countChildren(curr, 1);
         }
@@ -490,12 +499,12 @@ let selectByChildren = (node) => {
     return returnNode;
 }
 
-let getCandidateContainers =(method) => {
-       
+let getCandidateContainers = (method) => {
+
 }
 
 let selectAllByChildren = (node, depth, sorted) => {
-    if(!depth)depth = 1;
+    if (!depth) depth = 1;
     let selected = [];
     node.childNodes.forEach((node, index) => {
         selected = selected.concat(selectAllByChildren(node, depth, true));
@@ -504,9 +513,9 @@ let selectAllByChildren = (node, depth, sorted) => {
             count: countChildren(node, depth)
         });
     });
-    if(sorted){
-        selected.sort((a,b) => {
-            return b.count-a.count;     
+    if (sorted) {
+        selected.sort((a, b) => {
+            return b.count - a.count;
         });
     }
     return selected;
@@ -518,17 +527,17 @@ let countChildren = (node, depth) => {
 }
 
 let countChildrenRec = (node, depth, maxDepth) => {
-    if(depth >= maxDepth)return 1;
+    if (depth >= maxDepth) return 1;
     let count = 0;
     node.childNodes.forEach((node, index) => {
-        count += countChildrenRec(node, depth+1, maxDepth);
+        count += countChildrenRec(node, depth + 1, maxDepth);
     });
     return count;
 }
 let selectMaxChilren = (node, list) => {
     let children = node.childNodes.length;
     node.childNodes.forEach((node) => {
-        if(node.childNodes.length > children) ;   
+        if (node.childNodes.length > children);
     });
 }
 
