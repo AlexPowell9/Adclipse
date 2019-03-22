@@ -172,7 +172,7 @@ function convertToCanvases(containers) {
             //Sorting hat hack. See description for more details.
             promises.push(null);
             return;
-        } else if (window.innerHeight - dimensions.top < dimensions.height / 1.5) {
+        } else if (window.innerHeight - dimensions.top < dimensions.height / 1.14) {
             promises.push(null);
             return;
         }
