@@ -13,14 +13,13 @@
         }
     },
     "web_accessible_resources": [
-        "external/ml5/model.json",
-        "external/ml5/Screenshot_19.png",
-        "external/ml5/model.weights.bin"
+        "external/ml5/model/model.json",
+        "external/ml5/model/model.weights.bin"
     ],
     "content_scripts": [{
         "matches": ["http://*/*",
             "https://*/*"],
-        "js": ["external/ml5/ml5.min.js", "content.js", "ocr.js", "ml5.js", "html2canvas.min.js", "tesseract.min.js"],
+        "js": ["external/ml5/ml5.min.js", "content.js", "ocr.js", "ml5.js", "external/html2canvas/html2canvas.min.js", "external/tesseract/tesseract.min.js"],
         "css": ["content.css"],
         "run_at": "document_idle",
         "all_frames": false,

@@ -53,7 +53,7 @@ function vInitialize() {
 function vLoadModel() {
     vUpdateStatus("Loading Model...");
     var t0 = performance.now();
-    classifier.load("./external/ml5/model.json", () => {
+    classifier.load("./external/ml5/model/model.json", () => {
         var t1 = performance.now();
         vUpdateStatus("Model Loaded in " + (t1 - t0).toFixed(2) + " ms.");
     });

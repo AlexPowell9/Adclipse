@@ -70,8 +70,8 @@ function loadModel() {
     //regressor = features.regression();
     modelUpdateStatus("Loading Model...");
     var t0 = performance.now();
-    //regressor.load("./external/ml5/model.json", () => {
-    classifier.load("./external/ml5/model.json", () => {
+    //regressor.load("./external/ml5/model/model.json", () => {
+    classifier.load("./external/ml5/model/model.json", () => {
         var t1 = performance.now();
         modelUpdateStatus("Model Loaded in " + (t1 - t0).toFixed(2) + " ms.");
     });

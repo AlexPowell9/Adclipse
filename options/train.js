@@ -52,7 +52,7 @@ function tInitialize() {
 function tLoadModel() {
     tUpdateStatus("Loading Model...");
     var t0 = performance.now();
-    tClassifier.load("./external/ml5/model.json", () => {
+    tClassifier.load("./external/ml5/model/model.json", () => {
         var t1 = performance.now();
         tUpdateStatus("Model Loaded in " + (t1 - t0).toFixed(2) + " ms.");
     });
