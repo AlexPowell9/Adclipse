@@ -70,13 +70,13 @@ function loadModel() {
     //regressor = features.regression();
     modelUpdateStatus("Loading Model...");
     var t0 = performance.now();
-    //regressor.load("./external/ml5/model/model.json", () => {
-    classifier.load("./external/ml5/model/model.json", () => {
+    //regressor.load("./model/model.json", () => {
+    classifier.load("./model/model.json", () => {
         var t1 = performance.now();
         modelUpdateStatus("Model Loaded in " + (t1 - t0).toFixed(2) + " ms.");
     });
     //usage:
-    readTextFile("./external/ml5/model.json", function (text) {
+    readTextFile("./model/model.json", function (text) {
         var data = JSON.parse(text);
         /*
          * Removes any unwanted nodes from previous calls.

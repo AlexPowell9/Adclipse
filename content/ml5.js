@@ -29,7 +29,7 @@ function ml5Initialize() {
             console.log("Loading Model...");
             var t0 = performance.now();
             //https://developer.chrome.com/extensions/content_scripts
-            classifier.load(chrome.runtime.getURL("external/ml5/model/model.json"), () => {
+            classifier.load(chrome.runtime.getURL("model/model.json"), () => {
                 var t1 = performance.now();
                 console.log("Model Loaded in " + (t1 - t0).toFixed(2) + " ms.");
                 resolve("Done init ML5");
