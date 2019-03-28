@@ -25,6 +25,7 @@ To see it in action simply navigate to a website, wait for the site to settle, a
 *Pictured above is the location of the extension icon along with the badge that indicated three ads were blocked on this page.* 
 
 Clicking on the extension icon reveals the popup UI. This shows the version number and how many ads have been blocked on the page as well as allowing a user to get to the settings page by clicking the gear icon. If a user wishes to whitelist the page they are on, all they have to do is click the big eclipse in the top half of the popup, and then click the refresh button that appears, as pictured below in the middle. After the the refresh the user will notice that the icon has changed color to a white, to show that the page has been whitelisted, and that Adclipse is not running on this site, as pictured below on the right.
+
 | ![enter image description here](https://i.imgur.com/znfzmzW.png) | ![enter image description here](https://i.imgur.com/ZBNbBp8.png) | ![enter image description here](https://i.imgur.com/BNvhz2Q.png) |
 |--|--|--|
 | *The popup UI on a site where Adclipse is working.* | *The popup UI after clicking the eclipse to whitelist a site.* | *The popup UI after refreshing the page.* |
