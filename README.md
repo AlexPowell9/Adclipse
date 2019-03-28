@@ -1,7 +1,11 @@
 
 
+
 # Adclipse
 Adclipse is a perceptual ad-blocker developed as a client-side Chromium extension that uses an Image Classifier to highlight or remove online advertisements and promoted/sponsored content on web pages. Adclipse was developed by a team of three undergraduate students for a 2018/2019 Capstone project.
+
+![enter image description here](https://i.imgur.com/CbSZEPL.gif)
+*Adclipse in action on the reddit frontpage.*
 
 ## Background
 Online advertisements have become increasingly obtrusive over the last decade, which has lead the to the development and popularization of ad-blockers [\[1\]](https://www.researchgate.net/publication/224453778_Blocking_online_advertising_-_A_state_of_the_art). Modern ad-blockers allow users to prevent advertisements from being displayed through the use of filter lists, which are enormous lists comprised of domains, advertising specific HTML strings, and regular expressions. Unfortunately, these lists require considerable effort to curate [\[2\]](https://arxiv.org/pdf/1810.09160.pdf). A perceptual adblocker does not rely on lists, but rather takes a perceptual approach and uses various computer vision techniques to “see” the advertising content like a human would to identify and block advertisements [\[3\]](https://arxiv.org/abs/1705.08568). Adclipse showcases two perceptual approaches: Optical Character Recognition (OCR) and Image Classification.
@@ -129,10 +133,37 @@ After the Ad Detection component has returned the elements it identified as adve
 There are a few different highlight modes, some of which are simple CSS rules applied directly to the element in question like a border, remove, or greyscale, but others are slightly more complex. Both color and label are overlays on the element, which mean that they have to be added as children to the element and then sized the same as and positioned absolutely above the element. This also means that the element has to be changed to a relative position. During testing this has not had any overtly adverse effects but it is something to be aware of as it could break some kind of styling somewhere.
 
 ## Performance
+Below are some performance figures from Adclipse running on the Reddit frontpage. Your mileage may vary.
 
 ### Execution Time
 
+| Activity | Avg. Time (ms) |
+|--|--|
+| Load Model | 252.66 |
+| Container Selection | 2.68 |
+| Screenshot | 70.43 |
+| Crop Elements| 48.75 |
+| ML5 Image Classifier| 71.16 |
+| **Total Core Process Time**| 193.06 |
+
+These figures indicate that the most expensive computation is the model load, which happens only once on page load. The core loop takes about 200ms, and that runs every time the user stops scrolling. The most expensive parts of the process seem to be the image classifier and taking the screenshot. Unfortunately there is little that can be done to further optimize those functions. 
+
 ### Accuracy
+Below is a chart of accuracy on the Reddit frontpage, with different content being shown via the sort by function. 
+
+| Sorted By | Ads | Ads Blocked | Total Posts | Promoted  | Promoted Blocked | False Positive |
+|--|--|--|--|--|--|--|
+| Hot | 2 | 2 | 200 | 15 | 14 | 2 |
+| New| 0 | 0 | 51| 0 | 0 | 3 |
+| Top| 2 | 2 | 200 | 15 | 14 | 1 |
+| Rising| 0 | 0 | 200 | 0 | 0 | 0 |
+| Controversial| 0 | 0 | 200 | 16 | 16 | 7 |
+
+- 1.5% False Positive Rate
+- 95.6% Promoted Catch Rate
+- 100% Ad Catch Rate
+
+These statistics would indicate that Adclipse has the potential to be extremely effective when trained properly. They do not indicate that Adclipse is an amazing Ad-Blocker and would fare this well on other sites, please keep in mind our training data is heavily tailored to Reddit and all work done on the extension had Reddit in mind.
 
 ## Limitations
 This extension has many limitations and disadvantages associated with it. These limitations have been organized below as they correspond to different components of Adclipse. 
