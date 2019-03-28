@@ -1,7 +1,7 @@
 /* 
- * This is all to make the tabs pretty. 
+ * This is all to make the tabs pretty. We chose not to use a CSS framework for this which, in retrospect, was a questionable decision. 
  *
- *   https://codepen.io/oknoblich/pen/tfjFl
+ * https://codepen.io/oknoblich/pen/tfjFl
  */
 
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600,700');
